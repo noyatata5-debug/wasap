@@ -13,6 +13,7 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [taskTitle, setTaskTitle] = useState('');
+  const [taskDueTime, setTaskDueTime] = useState('');
   const [draftTitle, setDraftTitle] = useState('');
   const [expAmount, setExpAmount] = useState('');
   const [expDesc, setExpDesc] = useState('');
@@ -32,6 +33,7 @@ export default function Dashboard() {
   );
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [modalNewTaskTitle, setModalNewTaskTitle] = useState('');
+  const [modalDueTime, setModalDueTime] = useState('');
   const [modalTaskColor, setModalTaskColor] = useState('yellow'); // sticky note style
   const [calendarFilter, setCalendarFilter] = useState('all'); // 'all' | 'pending' | 'done' | 'expenses'
 
@@ -166,21 +168,25 @@ export default function Dashboard() {
   }
 
   // --- TASK ACTIONS ---
-  async function addTaskForDate(titleText, targetDate = today) {
+  async function addTaskForDate(titleText, targetDate = today, dueTime = null) {
     if (!titleText.trim() || !user) return;
 
     const newTitle = titleText.trim();
     try {
+      const insertPayload = {
+        title: newTitle,
+        status: 'pending',
+        task_date: targetDate,
+        phone_number: user.phone_number,
+      };
+      if (dueTime && dueTime.trim()) {
+        insertPayload.due_time = dueTime.trim();
+        insertPayload.is_reminder = true;
+      }
+
       const { data, error } = await supabase
         .from('tasks')
-        .insert([
-          {
-            title: newTitle,
-            status: 'pending',
-            task_date: targetDate,
-            phone_number: user.phone_number,
-          },
-        ])
+        .insert([insertPayload])
         .select()
         .single();
 
@@ -203,8 +209,9 @@ export default function Dashboard() {
   async function addTask(e) {
     e.preventDefault();
     setSubmittingTask(true);
-    await addTaskForDate(taskTitle, today);
+    await addTaskForDate(taskTitle, today, taskDueTime);
     setTaskTitle('');
+    setTaskDueTime('');
     setSubmittingTask(false);
   }
 
@@ -465,8 +472,9 @@ export default function Dashboard() {
   const handleModalAddTask = async (e) => {
     e.preventDefault();
     if (!modalNewTaskTitle.trim()) return;
-    await addTaskForDate(modalNewTaskTitle, selectedCalendarDate);
+    await addTaskForDate(modalNewTaskTitle, selectedCalendarDate, modalDueTime);
     setModalNewTaskTitle('');
+    setModalDueTime('');
   };
 
   // Loading or redirecting state
@@ -689,21 +697,41 @@ export default function Dashboard() {
               </div>
 
               {/* Add Task Form */}
-              <form onSubmit={addTask} className="relative flex items-center">
-                <input
-                  type="text"
-                  placeholder="Tulis tugas baru hari ini..."
-                  value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
-                  className="glass-input w-full pl-4 pr-12 py-3 rounded-xl text-sm placeholder:text-slate-500"
-                />
-                <button
-                  type="submit"
-                  disabled={submittingTask || !taskTitle.trim()}
-                  className="absolute right-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 disabled:opacity-40 disabled:hover:bg-blue-600 text-white text-xs font-semibold transition-all shadow-md"
-                >
-                  {submittingTask ? '...' : '+ Add'}
-                </button>
+              <form onSubmit={addTask} className="space-y-2">
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    placeholder="Tulis tugas baru hari ini..."
+                    value={taskTitle}
+                    onChange={(e) => setTaskTitle(e.target.value)}
+                    className="glass-input w-full pl-4 pr-12 py-3 rounded-xl text-sm placeholder:text-slate-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={submittingTask || !taskTitle.trim()}
+                    className="absolute right-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 disabled:opacity-40 disabled:hover:bg-blue-600 text-white text-xs font-semibold transition-all shadow-md"
+                  >
+                    {submittingTask ? '...' : '+ Add'}
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 px-1 text-xs text-slate-400">
+                  <span className="flex items-center gap-1">⏰ Reminder Jam:</span>
+                  <input
+                    type="time"
+                    value={taskDueTime}
+                    onChange={(e) => setTaskDueTime(e.target.value)}
+                    className="glass-input px-2 py-1 rounded-lg text-xs font-mono text-slate-200 bg-slate-900/90"
+                  />
+                  {taskDueTime && (
+                    <button
+                      type="button"
+                      onClick={() => setTaskDueTime('')}
+                      className="text-[10px] text-rose-400 hover:underline"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
               </form>
 
               {/* Task Items List */}
@@ -749,13 +777,20 @@ export default function Dashboard() {
                               </svg>
                             )}
                           </button>
-                          <span
-                            className={`text-sm select-none break-words ${
-                              isDone ? 'line-through text-slate-500' : 'text-slate-200 font-medium'
-                            }`}
-                          >
-                            {t.title}
-                          </span>
+                          <div className="flex flex-col">
+                            <span
+                              className={`text-sm select-none break-words ${
+                                isDone ? 'line-through text-slate-500' : 'text-slate-200 font-medium'
+                              }`}
+                            >
+                              {t.title}
+                            </span>
+                            {t.due_time && (
+                              <span className="flex items-center gap-1 text-[11px] font-mono text-amber-300/90 mt-0.5">
+                                <span>⏰</span> {t.due_time.slice(0, 5)} WIB
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         <button
@@ -1180,15 +1215,15 @@ export default function Dashboard() {
                         return (
                           <div
                             key={t.id}
-                            title={t.title}
+                            title={`${t.title}${t.due_time ? ` (⏰ ${t.due_time.slice(0, 5)})` : ''}`}
                             className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-medium border truncate transition-all shadow-sm ${
                               isDone
                                 ? 'bg-slate-900/60 border-slate-800 text-slate-500 line-through opacity-60'
                                 : `${assignedStyle.bg} ${assignedStyle.border} ${assignedStyle.text} hover:scale-102`
                             }`}
                           >
-                            <span className="text-[9px]">{isDone ? '✅' : assignedStyle.pin}</span>
-                            <span className="truncate">{t.title}</span>
+                            <span className="text-[9px]">{isDone ? '✅' : (t.due_time ? '⏰' : assignedStyle.pin)}</span>
+                            <span className="truncate">{t.due_time ? `[${t.due_time.slice(0, 5)}] ` : ''}{t.title}</span>
                           </div>
                         );
                       })}
@@ -1315,13 +1350,20 @@ export default function Dashboard() {
                               </svg>
                             )}
                           </button>
-                          <span
-                            className={`text-sm font-medium break-words ${
-                              isDone ? 'line-through text-slate-500' : 'text-slate-100'
-                            }`}
-                          >
-                            {t.title}
-                          </span>
+                          <div className="flex flex-col">
+                            <span
+                              className={`text-sm font-medium break-words ${
+                                isDone ? 'line-through text-slate-500' : 'text-slate-100'
+                              }`}
+                            >
+                              {t.title}
+                            </span>
+                            {t.due_time && (
+                              <span className="flex items-center gap-1 text-xs font-mono text-amber-300 mt-0.5">
+                                <span>⏰</span> {t.due_time.slice(0, 5)} WIB
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         <button
@@ -1368,22 +1410,42 @@ export default function Dashboard() {
                 + Tempel Catatan / Tugas Baru di Tanggal Ini
               </h4>
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Ketik catatan atau tugas baru..."
-                  value={modalNewTaskTitle}
-                  onChange={(e) => setModalNewTaskTitle(e.target.value)}
-                  className="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm placeholder:text-slate-500 focus:border-amber-500"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={!modalNewTaskTitle.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-40 text-slate-950 text-xs font-bold transition shadow-glow-amber active:scale-95 whitespace-nowrap"
-                >
-                  + Tempel
-                </button>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ketik catatan atau tugas baru..."
+                    value={modalNewTaskTitle}
+                    onChange={(e) => setModalNewTaskTitle(e.target.value)}
+                    className="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm placeholder:text-slate-500 focus:border-amber-500"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={!modalNewTaskTitle.trim()}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-40 text-slate-950 text-xs font-bold transition shadow-glow-amber active:scale-95 whitespace-nowrap"
+                  >
+                    + Tempel
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 px-1 text-xs text-slate-400">
+                  <span className="flex items-center gap-1">⏰ Reminder Jam:</span>
+                  <input
+                    type="time"
+                    value={modalDueTime}
+                    onChange={(e) => setModalDueTime(e.target.value)}
+                    className="glass-input px-2.5 py-1 rounded-lg text-xs font-mono text-slate-200 bg-slate-900/90"
+                  />
+                  {modalDueTime && (
+                    <button
+                      type="button"
+                      onClick={() => setModalDueTime('')}
+                      className="text-[10px] text-rose-400 hover:underline"
+                    >
+                      Reset Jam
+                    </button>
+                  )}
+                </div>
               </div>
             </form>
           </div>
