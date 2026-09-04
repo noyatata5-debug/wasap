@@ -1,8 +1,14 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '../lib/authContext';
 import { supabase } from '../lib/supabase';
 
 export default function Dashboard() {
+  const router = useRouter();
+  const { user, loading: authLoading, logout } = useAuth();
+
   const [tasks, setTasks] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [taskTitle, setTaskTitle] = useState('');
@@ -37,6 +43,13 @@ export default function Dashboard() {
     }, 3200);
   };
 
+  // Auth Guard
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
   // Live Clock & Formatted Date
   useEffect(() => {
     const updateTime = () => {
@@ -55,32 +68,45 @@ export default function Dashboard() {
     return new Date().toLocaleDateString('id-ID', options);
   }, []);
 
-  // Fetch initial data & Realtime channel subscription
+  // Fetch initial data & Realtime channel subscription per user's phone_number
   useEffect(() => {
-    fetchData();
+    if (user && user.phone_number) {
+      fetchData();
 
-    // Supabase Realtime subscription
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
-        fetchData(false);
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => {
-        fetchData(false);
-      })
-      .subscribe();
+      // Supabase Realtime channel
+      const channel = supabase
+        .channel(`user-realtime-${user.phone_number}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
+          fetchData(false);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => {
+          fetchData(false);
+        })
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
 
   async function fetchData(showLoader = true) {
+    if (!user) return;
     if (showLoader) setLoading(true);
+
     try {
+      // Query tasks: either matching user's phone_number OR NULL (for legacy initial entries)
       const [{ data: tData, error: tErr }, { data: eData, error: eErr }] = await Promise.all([
-        supabase.from('tasks').select('*').order('id', { ascending: false }),
-        supabase.from('expenses').select('*').order('id', { ascending: false }),
+        supabase
+          .from('tasks')
+          .select('*')
+          .or(`phone_number.eq.${user.phone_number},phone_number.is.null`)
+          .order('id', { ascending: false }),
+        supabase
+          .from('expenses')
+          .select('*')
+          .or(`phone_number.eq.${user.phone_number},phone_number.is.null`)
+          .order('id', { ascending: false }),
       ]);
 
       if (tErr) console.error('Error fetching tasks:', tErr);
@@ -98,13 +124,18 @@ export default function Dashboard() {
   // --- TASK ACTIONS ---
   async function addTask(e) {
     e.preventDefault();
-    if (!taskTitle.trim()) return;
+    if (!taskTitle.trim() || !user) return;
 
     setSubmittingTask(true);
     const newTitle = taskTitle.trim();
     try {
       const { error } = await supabase.from('tasks').insert([
-        { title: newTitle, status: 'pending', task_date: today }
+        {
+          title: newTitle,
+          status: 'pending',
+          task_date: today,
+          phone_number: user.phone_number,
+        },
       ]);
       if (error) throw error;
       setTaskTitle('');
@@ -120,13 +151,18 @@ export default function Dashboard() {
 
   async function addDraft(e) {
     e.preventDefault();
-    if (!draftTitle.trim()) return;
+    if (!draftTitle.trim() || !user) return;
 
     setSubmittingDraft(true);
     const newDraft = draftTitle.trim();
     try {
       const { error } = await supabase.from('tasks').insert([
-        { title: newDraft, status: 'draft', task_date: today }
+        {
+          title: newDraft,
+          status: 'draft',
+          task_date: today,
+          phone_number: user.phone_number,
+        },
       ]);
       if (error) throw error;
       setDraftTitle('');
@@ -188,7 +224,7 @@ export default function Dashboard() {
   // --- EXPENSE ACTIONS ---
   async function addExpense(e) {
     e.preventDefault();
-    if (!expAmount || !expDesc.trim()) return;
+    if (!expAmount || !expDesc.trim() || !user) return;
 
     setSubmittingExpense(true);
     const amountVal = Number(expAmount);
@@ -196,7 +232,12 @@ export default function Dashboard() {
 
     try {
       const { error } = await supabase.from('expenses').insert([
-        { amount: amountVal, description: descFormatted, expense_date: today }
+        {
+          amount: amountVal,
+          description: descFormatted,
+          expense_date: today,
+          phone_number: user.phone_number,
+        },
       ]);
       if (error) throw error;
       setExpAmount('');
@@ -255,6 +296,18 @@ export default function Dashboard() {
     return todayExpenses.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
   }, [todayExpenses]);
 
+  // Loading or redirecting state
+  if (authLoading || (!user && !authLoading)) {
+    return (
+      <div className="min-h-screen bg-[#090d16] flex items-center justify-center text-slate-400">
+        <div className="flex items-center gap-3">
+          <span className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <span>Memuat workspace Anda...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-[#090d16] bg-ambient-grid text-slate-100 selection:bg-emerald-500 selection:text-black pb-16">
       {/* Dynamic Ambient Background Glows */}
@@ -276,7 +329,48 @@ export default function Dashboard() {
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 sm:space-y-8">
+        {/* --- TOP PROFILE & ADMIN BAR --- */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center text-xs font-bold text-slate-950 shadow-md">
+              {user.username.slice(0, 2).toUpperCase()}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-white">@{user.username}</span>
+              <span className="text-xs font-mono text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800">
+                +{user.phone_number}
+              </span>
+              {user.role === 'admin' && (
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  Admin
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {user.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/30 text-purple-300 text-xs font-semibold transition"
+              >
+                <span>👑 Admin Panel</span>
+              </Link>
+            )}
+            <button
+              onClick={() => {
+                logout();
+                router.push('/login');
+              }}
+              title="Keluar Akun"
+              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-500/30 text-slate-400 hover:text-rose-300 text-xs font-medium transition"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
         {/* --- HEADER SECTION --- */}
         <header className="glass-panel rounded-3xl p-6 sm:p-8 shadow-glass relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />
@@ -296,7 +390,7 @@ export default function Dashboard() {
                   </h1>
                 </div>
               </div>
-              <p className="text-sm text-slate-400 flex items-center gap-2">
+              <p className="text-sm text-slate-400 flex items-center gap-2 flex-wrap">
                 <span className="capitalize">{formattedDate}</span>
                 <span className="text-slate-600">•</span>
                 <span className="font-mono text-emerald-400 font-semibold">{currentTime} WIB</span>
@@ -310,7 +404,7 @@ export default function Dashboard() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                 </span>
-                <span>Live Synced (WA & DB)</span>
+                <span>WA Sync (+{user.phone_number})</span>
               </div>
 
               <button
@@ -453,7 +547,7 @@ export default function Dashboard() {
                         ? 'Tidak ada tugas yang tertunda! Santai sejenak.'
                         : 'Belum ada tugas untuk hari ini.'}
                     </p>
-                    <p className="text-xs text-slate-600">Tambah tugas di atas atau kirim via WhatsApp</p>
+                    <p className="text-xs text-slate-600">Tambah tugas di atas atau chat via bot WhatsApp</p>
                   </div>
                 ) : (
                   displayedTodayTasks.map((t) => {

@@ -1,4 +1,5 @@
 import './globals.css';
+import { Providers } from './providers';
 
 export const metadata = {
   title: 'Wasap Daily Hub — Personal Workspace & Expense Control',
@@ -12,9 +13,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="id" className="dark">
       <body className="bg-[#090d16] text-slate-100 min-h-screen antialiased selection:bg-emerald-500 selection:text-black">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
 }
+
 
