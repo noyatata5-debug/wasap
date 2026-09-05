@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../lib/authContext';
 import { supabase } from '../../lib/supabase';
+import Navbar from '../components/Navbar';
 
 export default function AdminPage() {
   const router = useRouter();
