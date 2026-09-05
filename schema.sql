@@ -91,3 +91,28 @@ CREATE INDEX IF NOT EXISTS idx_threads_phone ON public.threads(phone_number);
 CREATE INDEX IF NOT EXISTS idx_threads_date ON public.threads(scheduled_date);
 CREATE INDEX IF NOT EXISTS idx_users_phone ON public.users(phone_number);
 CREATE INDEX IF NOT EXISTS idx_users_username ON public.users(username);
+
+-- 9. Row Level Security (RLS Policies)
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on users" ON public.users;
+CREATE POLICY "Allow all on users" ON public.users FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on tasks" ON public.tasks;
+CREATE POLICY "Allow all on tasks" ON public.tasks FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on expenses" ON public.expenses;
+CREATE POLICY "Allow all on expenses" ON public.expenses FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE public.incomes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on incomes" ON public.incomes;
+CREATE POLICY "Allow all on incomes" ON public.incomes FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE public.threads ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on threads" ON public.threads;
+CREATE POLICY "Allow all on threads" ON public.threads FOR ALL USING (true) WITH CHECK (true);
+
+ALTER TABLE public.admin_notes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow all on admin_notes" ON public.admin_notes;
+CREATE POLICY "Allow all on admin_notes" ON public.admin_notes FOR ALL USING (true) WITH CHECK (true);
