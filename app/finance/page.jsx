@@ -14,14 +14,14 @@ export default function PersonalFinancePage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // View Timeframe Mode: 'daily' | 'monthly' | 'yearly'
+  // Timeframe Mode: 'daily' | 'monthly' | 'yearly'
   const [timeframe, setTimeframe] = useState('monthly');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // 0-11
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedDateStr, setSelectedDateStr] = useState(new Date().toISOString().split('T')[0]);
 
   // Form State
-  const [trxType, setTrxType] = useState('expense'); // 'income' | 'expense'
+  const [trxType, setTrxType] = useState('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('Makan');
   const [description, setDescription] = useState('');
@@ -29,9 +29,8 @@ export default function PersonalFinancePage() {
   const [submitting, setSubmitting] = useState(false);
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
-
-  const incomeCategories = ['Gaji', 'Freelance', 'Bisnis', 'Investasi', 'Hadiah / Bonus', 'Lainnya'];
-  const expenseCategories = ['Makan', 'Transport', 'Belanja', 'Tagihan', 'Hiburan', 'Keluarga', 'Lainnya'];
+  const incomeCategories = ['Gaji', 'Freelance', 'Bisnis', 'Investasi', 'Hadiah', 'Lainnya'];
+  const expenseCategories = ['Makan', 'Transport', 'Belanja', 'Tagihan', 'Hiburan', 'Lainnya'];
 
   const monthNames = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -40,7 +39,7 @@ export default function PersonalFinancePage() {
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 3200);
+    setTimeout(() => setToast(null), 3000);
   };
 
   useEffect(() => {
@@ -70,7 +69,7 @@ export default function PersonalFinancePage() {
     if (showLoader) setLoading(true);
 
     try {
-      const [{ data: incData, error: incErr }, { data: expData, error: expErr }] = await Promise.all([
+      const [{ data: incData }, { data: expData }] = await Promise.all([
         supabase
           .from('incomes')
           .select('*')
@@ -82,9 +81,6 @@ export default function PersonalFinancePage() {
           .or(`phone_number.eq.${user.phone_number},phone_number.is.null`)
           .order('expense_date', { ascending: false }),
       ]);
-
-      if (incErr) console.error('Fetch incomes error:', incErr);
-      if (expErr) console.error('Fetch expenses error:', expErr);
 
       if (incData) setIncomes(incData);
       if (expData) setExpenses(expData);
@@ -115,7 +111,7 @@ export default function PersonalFinancePage() {
           },
         ]);
         if (error) throw error;
-        showToast(`Pemasukan Rp ${numAmount.toLocaleString('id-ID')} berhasil dicatat! 📈`);
+        showToast(`Pemasukan Rp ${numAmount.toLocaleString('id-ID')} dicatat!`);
       } else {
         const { error } = await supabase.from('expenses').insert([
           {
@@ -127,7 +123,7 @@ export default function PersonalFinancePage() {
           },
         ]);
         if (error) throw error;
-        showToast(`Pengeluaran Rp ${numAmount.toLocaleString('id-ID')} berhasil dicatat! 💸`);
+        showToast(`Pengeluaran Rp ${numAmount.toLocaleString('id-ID')} dicatat!`);
       }
 
       setAmount('');
@@ -135,7 +131,6 @@ export default function PersonalFinancePage() {
       fetchFinanceData(false);
     } catch (err) {
       showToast('Gagal menyimpan transaksi', 'error');
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -151,18 +146,18 @@ export default function PersonalFinancePage() {
       } else {
         setExpenses(prev => prev.filter(e => e.id !== id));
       }
-      showToast('Transaksi berhasil dihapus');
+      showToast('Transaksi dihapus');
     } catch (err) {
       showToast('Gagal menghapus transaksi', 'error');
     }
   }
 
-  // --- TIMEFRAME FILTERED DATA ---
+  // Timeframe filtering
   const filteredIncomes = useMemo(() => {
     return incomes.filter((i) => {
       const date = i.income_date;
       if (!date) return false;
-      const [y, m, d] = date.split('-').map(Number);
+      const [y, m] = date.split('-').map(Number);
       if (timeframe === 'daily') return date === selectedDateStr;
       if (timeframe === 'monthly') return y === selectedYear && m === selectedMonth + 1;
       if (timeframe === 'yearly') return y === selectedYear;
@@ -174,7 +169,7 @@ export default function PersonalFinancePage() {
     return expenses.filter((e) => {
       const date = e.expense_date;
       if (!date) return false;
-      const [y, m, d] = date.split('-').map(Number);
+      const [y, m] = date.split('-').map(Number);
       if (timeframe === 'daily') return date === selectedDateStr;
       if (timeframe === 'monthly') return y === selectedYear && m === selectedMonth + 1;
       if (timeframe === 'yearly') return y === selectedYear;
@@ -182,18 +177,11 @@ export default function PersonalFinancePage() {
     });
   }, [expenses, timeframe, selectedDateStr, selectedYear, selectedMonth]);
 
-  const totalIncome = useMemo(() => {
-    return filteredIncomes.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-  }, [filteredIncomes]);
-
-  const totalExpense = useMemo(() => {
-    return filteredExpenses.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-  }, [filteredExpenses]);
-
+  const totalIncome = useMemo(() => filteredIncomes.reduce((s, i) => s + Number(i.amount || 0), 0), [filteredIncomes]);
+  const totalExpense = useMemo(() => filteredExpenses.reduce((s, e) => s + Number(e.amount || 0), 0), [filteredExpenses]);
   const netSavings = totalIncome - totalExpense;
   const savingsRate = totalIncome > 0 ? Math.max(0, Math.round((netSavings / totalIncome) * 100)) : 0;
 
-  // --- MONTHLY CASHFLOW BREAKDOWN FOR CHART (12 Months of Selected Year) ---
   const monthlyChartData = useMemo(() => {
     return monthNames.map((name, idx) => {
       const monthNum = idx + 1;
@@ -216,43 +204,14 @@ export default function PersonalFinancePage() {
         fullMonth: name,
         income: inc,
         expense: exp,
-        net: inc - exp,
       };
     });
   }, [incomes, expenses, selectedYear]);
 
   const maxChartValue = useMemo(() => {
-    const max = Math.max(
-      ...monthlyChartData.map((d) => Math.max(d.income, d.expense)),
-      100000
-    );
-    return max;
+    return Math.max(...monthlyChartData.map((d) => Math.max(d.income, d.expense)), 100000);
   }, [monthlyChartData]);
 
-  // --- EXPENSE CATEGORY DISTRIBUTION BREAKDOWN ---
-  const categoryBreakdown = useMemo(() => {
-    const map = {};
-    filteredExpenses.forEach((e) => {
-      let cat = e.category || 'Lainnya';
-      if (!cat || cat === 'Lainnya') {
-        // Try extracting from description [Kategori]
-        const match = (e.description || '').match(/^\[(.*?)\]/);
-        if (match) cat = match[1];
-      }
-      if (!map[cat]) map[cat] = 0;
-      map[cat] += Number(e.amount || 0);
-    });
-
-    return Object.entries(map)
-      .map(([name, val]) => ({
-        category: name,
-        amount: val,
-        percentage: totalExpense > 0 ? Math.round((val / totalExpense) * 100) : 0,
-      }))
-      .sort((a, b) => b.amount - a.amount);
-  }, [filteredExpenses, totalExpense]);
-
-  // Combined Transactions List
   const combinedTransactions = useMemo(() => {
     const list = [
       ...filteredIncomes.map((i) => ({ ...i, type: 'income', date: i.income_date })),
@@ -263,68 +222,48 @@ export default function PersonalFinancePage() {
 
   if (authLoading || (!user && !authLoading)) {
     return (
-      <div className="min-h-screen bg-[#090d16] flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-[#f9f7f0] flex items-center justify-center text-[#616c8a]">
         <div className="flex items-center gap-3">
-          <span className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <span>Memuat Personal Finance...</span>
+          <span className="w-5 h-5 border-2 border-[#2e96ff] border-t-transparent rounded-full animate-spin" />
+          <span className="font-semibold text-sm">Memuat Finance...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-[#090d16] bg-ambient-grid text-slate-100 selection:bg-emerald-500 selection:text-black pb-24">
-      {/* Ambient Glows */}
-      <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse-subtle" />
-      <div className="fixed bottom-20 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
-
+    <div className="min-h-screen bg-[#f9f7f0] text-[#333333] pb-24">
       <Navbar />
 
-      {/* Toast Notification */}
       {toast && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border transition-all animate-fade-in ${
-            toast.type === 'error'
-              ? 'bg-rose-950/90 border-rose-500/40 text-rose-200'
-              : 'bg-slate-900/90 border-emerald-500/40 text-emerald-300'
-          }`}
-        >
-          <span className="text-base">{toast.type === 'error' ? '⚠️' : '✅'}</span>
-          <span className="text-sm font-medium">{toast.message}</span>
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in ${
+          toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-[#13426f] text-white'
+        }`}>
+          <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
+          <span className="text-xs font-bold">{toast.message}</span>
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-8">
-        {/* Header & Filter Controls */}
-        <header className="glass-panel rounded-3xl p-6 sm:p-8 shadow-glass flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
+        {/* Header & Controls */}
+        <div className="relief-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 text-xl font-bold shadow-glow-emerald">
-                📈
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                  Personal Finance & Cashflow
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-400">
-                  Rekap income & outcome harian, bulanan, tahunan dengan visualisasi grafik lengkap
-                </p>
-              </div>
-            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] tracking-tight">
+              Personal Finance
+            </h1>
+            <p className="text-xs sm:text-sm text-[#616c8a]">
+              Rekap pemasukan, pengeluaran & grafik arus kas
+            </p>
           </div>
 
-          {/* Timeframe Selector & Date Controls */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Timeframe Tabs */}
-            <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 bg-[#f9f7f0] p-1 rounded-full border border-[#e7e5dc] text-xs font-bold">
               {['daily', 'monthly', 'yearly'].map((t) => (
                 <button
                   key={t}
                   onClick={() => setTimeframe(t)}
-                  className={`px-3 py-1.5 rounded-lg capitalize transition-all ${
-                    timeframe === t
-                      ? 'bg-emerald-600 text-white shadow-md'
-                      : 'text-slate-400 hover:text-slate-200'
+                  className={`px-3 py-1.5 rounded-full capitalize transition ${
+                    timeframe === t ? 'bg-[#13426f] text-white shadow-sm' : 'text-[#616c8a] hover:text-[#13426f]'
                   }`}
                 >
                   {t === 'daily' ? 'Harian' : t === 'monthly' ? 'Bulanan' : 'Tahunan'}
@@ -332,177 +271,97 @@ export default function PersonalFinancePage() {
               ))}
             </div>
 
-            {/* Context Pickers */}
             {timeframe === 'daily' && (
               <input
                 type="date"
                 value={selectedDateStr}
                 onChange={(e) => setSelectedDateStr(e.target.value)}
-                className="glass-input px-3 py-1.5 rounded-xl text-xs font-mono text-slate-200 bg-slate-900"
+                className="relief-input px-3 py-1.5 rounded-full text-xs font-mono font-bold"
               />
             )}
 
             {timeframe === 'monthly' && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <select
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                  className="glass-input px-3 py-1.5 rounded-xl text-xs font-medium text-slate-200 bg-slate-900"
+                  className="relief-input px-3 py-1.5 rounded-full text-xs font-bold"
                 >
                   {monthNames.map((m, idx) => (
-                    <option key={m} value={idx}>
-                      {m}
-                    </option>
+                    <option key={m} value={idx}>{m}</option>
                   ))}
                 </select>
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="glass-input px-3 py-1.5 rounded-xl text-xs font-medium text-slate-200 bg-slate-900"
+                  className="relief-input px-3 py-1.5 rounded-full text-xs font-bold"
                 >
                   {[2024, 2025, 2026, 2027].map((y) => (
-                    <option key={y} value={y}>
-                      {y}
-                    </option>
+                    <option key={y} value={y}>{y}</option>
                   ))}
                 </select>
               </div>
             )}
-
-            {timeframe === 'yearly' && (
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="glass-input px-3 py-1.5 rounded-xl text-xs font-medium text-slate-200 bg-slate-900"
-              >
-                {[2024, 2025, 2026, 2027].map((y) => (
-                  <option key={y} value={y}>
-                    Tahun {y}
-                  </option>
-                ))}
-              </select>
-            )}
           </div>
-        </header>
+        </div>
 
-        {/* --- 4 STATS SUMMARY CARDS --- */}
+        {/* 4 Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {/* Total Income */}
-          <div className="glass-panel rounded-2xl p-5 border border-emerald-500/20 space-y-1 relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold tracking-wider text-emerald-400">Total Pemasukan</span>
-              <span className="text-lg">📈</span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
-              Rp {totalIncome.toLocaleString('id-ID')}
-            </p>
-            <p className="text-xs text-slate-500">{filteredIncomes.length} transaksi pemasukan</p>
+          <div className="relief-card p-5 space-y-1">
+            <span className="text-xs font-bold uppercase text-emerald-600">Pemasukan (Income)</span>
+            <p className="text-2xl font-black font-mono text-[#13426f]">Rp {totalIncome.toLocaleString('id-ID')}</p>
+            <p className="text-[11px] text-[#616c8a]">{filteredIncomes.length} transaksi</p>
           </div>
 
-          {/* Total Expense */}
-          <div className="glass-panel rounded-2xl p-5 border border-rose-500/20 space-y-1 relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold tracking-wider text-rose-400">Total Pengeluaran</span>
-              <span className="text-lg">💸</span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-black text-rose-400 font-mono">
-              Rp {totalExpense.toLocaleString('id-ID')}
-            </p>
-            <p className="text-xs text-slate-500">{filteredExpenses.length} transaksi pengeluaran</p>
+          <div className="relief-card p-5 space-y-1">
+            <span className="text-xs font-bold uppercase text-rose-600">Pengeluaran (Expense)</span>
+            <p className="text-2xl font-black font-mono text-rose-600">Rp {totalExpense.toLocaleString('id-ID')}</p>
+            <p className="text-[11px] text-[#616c8a]">{filteredExpenses.length} transaksi</p>
           </div>
 
-          {/* Net Cashflow */}
-          <div className={`glass-panel rounded-2xl p-5 border space-y-1 relative overflow-hidden ${
-            netSavings >= 0 ? 'border-indigo-500/30' : 'border-amber-500/30'
-          }`}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold tracking-wider text-indigo-300">Saldo Bersih (Net)</span>
-              <span className="text-lg">💰</span>
-            </div>
-            <p className={`text-2xl sm:text-3xl font-black font-mono ${
-              netSavings >= 0 ? 'text-indigo-400' : 'text-amber-400'
-            }`}>
+          <div className="relief-card p-5 space-y-1">
+            <span className="text-xs font-bold uppercase text-[#13426f]">Saldo Bersih (Net)</span>
+            <p className={`text-2xl font-black font-mono ${netSavings >= 0 ? 'text-[#13426f]' : 'text-amber-600'}`}>
               {netSavings < 0 ? '-' : '+'}Rp {Math.abs(netSavings).toLocaleString('id-ID')}
             </p>
-            <p className="text-xs text-slate-500">
-              {netSavings >= 0 ? 'Surplus / Menabung' : 'Defisit (Pengeluaran > Pemasukan)'}
-            </p>
+            <p className="text-[11px] text-[#616c8a]">{netSavings >= 0 ? 'Surplus Kas' : 'Defisit Arus Kas'}</p>
           </div>
 
-          {/* Savings Rate */}
-          <div className="glass-panel rounded-2xl p-5 border border-purple-500/20 space-y-1 relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase font-bold tracking-wider text-purple-300">Savings Rate</span>
-              <span className="text-lg">🎯</span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-black text-purple-400">
-              {savingsRate}%
-            </p>
-            <div className="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(savingsRate, 100)}%` }}
-              />
+          <div className="relief-card p-5 space-y-1">
+            <span className="text-xs font-bold uppercase text-[#2e96ff]">Savings Rate</span>
+            <p className="text-2xl font-black text-[#2e96ff]">{savingsRate}%</p>
+            <div className="w-full bg-[#f1ede1] h-2 rounded-full overflow-hidden mt-2">
+              <div className="bg-[#2e96ff] h-full rounded-full" style={{ width: `${Math.min(savingsRate, 100)}%` }} />
             </div>
           </div>
         </div>
 
-        {/* --- 2 CHARTS VISUALIZATION ROW --- */}
+        {/* Chart & Form Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Monthly Cashflow Bar Chart (2 Cols) */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-5 lg:col-span-2 shadow-glass">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <span>📊 Grafik Perbandingan Cashflow Bulanan ({selectedYear})</span>
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Perbandingan Pemasukan (Hijau) vs Pengeluaran (Merah) per bulan
-                </p>
-              </div>
-              <div className="flex items-center gap-3 text-xs font-semibold">
-                <span className="flex items-center gap-1.5 text-emerald-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Income
-                </span>
-                <span className="flex items-center gap-1.5 text-rose-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Expense
-                </span>
+          {/* Monthly Bar Chart */}
+          <div className="relief-card p-6 sm:p-7 space-y-5 lg:col-span-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-extrabold text-[#13426f]">
+                📊 Arus Kas Bulanan ({selectedYear})
+              </h3>
+              <div className="flex items-center gap-3 text-xs font-bold">
+                <span className="text-emerald-600">● Income</span>
+                <span className="text-rose-600">● Expense</span>
               </div>
             </div>
 
-            {/* Custom Interactive Dark Bar Chart */}
-            <div className="pt-6 pb-2 grid grid-cols-12 gap-1.5 sm:gap-3 items-end min-h-[240px] border-b border-slate-800">
+            <div className="pt-6 pb-2 grid grid-cols-12 gap-2 items-end min-h-[220px] border-b border-[#e7e5dc]">
               {monthlyChartData.map((d, idx) => {
-                const incomeHeight = maxChartValue > 0 ? (d.income / maxChartValue) * 160 : 0;
-                const expenseHeight = maxChartValue > 0 ? (d.expense / maxChartValue) * 160 : 0;
+                const incHeight = maxChartValue > 0 ? (d.income / maxChartValue) * 140 : 0;
+                const expHeight = maxChartValue > 0 ? (d.expense / maxChartValue) * 140 : 0;
 
                 return (
                   <div key={d.month} className="flex flex-col items-center gap-2 group relative">
-                    {/* Hover Tooltip */}
-                    <div className="absolute -top-14 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none bg-slate-900/95 border border-slate-700 p-2 rounded-xl shadow-xl text-[10px] whitespace-nowrap space-y-0.5">
-                      <p className="font-bold text-white">{d.fullMonth}</p>
-                      <p className="text-emerald-400">+Rp {d.income.toLocaleString('id-ID')}</p>
-                      <p className="text-rose-400">-Rp {d.expense.toLocaleString('id-ID')}</p>
+                    <div className="flex items-end gap-1 w-full justify-center h-[140px]">
+                      <div className="w-2.5 bg-emerald-500 rounded-t-md" style={{ height: `${Math.max(incHeight, 2)}px` }} />
+                      <div className="w-2.5 bg-rose-500 rounded-t-md" style={{ height: `${Math.max(expHeight, 2)}px` }} />
                     </div>
-
-                    {/* Bars Container */}
-                    <div className="flex items-end gap-0.5 sm:gap-1 w-full justify-center h-[160px]">
-                      {/* Income Bar */}
-                      <div
-                        className="w-2 sm:w-3 bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-md transition-all duration-500 hover:brightness-125"
-                        style={{ height: `${Math.max(incomeHeight, 2)}px` }}
-                      />
-                      {/* Expense Bar */}
-                      <div
-                        className="w-2 sm:w-3 bg-gradient-to-t from-rose-600 to-amber-500 rounded-t-md transition-all duration-500 hover:brightness-125"
-                        style={{ height: `${Math.max(expenseHeight, 2)}px` }}
-                      />
-                    </div>
-
-                    {/* Month Label */}
-                    <span className={`text-[10px] sm:text-xs font-semibold ${
-                      idx === selectedMonth ? 'text-emerald-400 font-bold' : 'text-slate-500'
-                    }`}>
+                    <span className={`text-[10px] font-bold ${idx === selectedMonth ? 'text-[#2e96ff]' : 'text-[#616c8a]'}`}>
                       {d.month}
                     </span>
                   </div>
@@ -511,252 +370,135 @@ export default function PersonalFinancePage() {
             </div>
           </div>
 
-          {/* Category Breakdown (1 Col) */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-5 shadow-glass">
-            <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span>🍩 Kategori Pengeluaran</span>
-              </h3>
-              <p className="text-xs text-slate-400">
-                Distribusi pengeluaran berdasarkan pos anggaran
-              </p>
-            </div>
+          {/* Form Transaksi */}
+          <div className="relief-card p-6 space-y-4">
+            <h3 className="text-base font-extrabold text-[#13426f]">+ Catat Transaksi</h3>
 
-            <div className="space-y-3.5 max-h-[260px] overflow-y-auto pr-1">
-              {categoryBreakdown.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-500">
-                  Belum ada transaksi pengeluaran di periode ini.
-                </div>
-              ) : (
-                categoryBreakdown.map((c) => (
-                  <div key={c.category} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-slate-300">{c.category}</span>
-                      <div className="flex items-center gap-2 font-mono">
-                        <span className="text-slate-400">Rp {c.amount.toLocaleString('id-ID')}</span>
-                        <span className="font-bold text-rose-400">{c.percentage}%</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                      <div
-                        className="bg-gradient-to-r from-rose-500 to-amber-500 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${c.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* --- FORM & TRANSACTIONS TABLE ROW --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Form Input Transaksi (1 Col) */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-5 shadow-glass">
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span>+ Catat Transaksi Baru</span>
-              </h3>
-              <p className="text-xs text-slate-400">
-                Input pemasukan atau pengeluaran keuangan Anda
-              </p>
-            </div>
-
-            {/* Type Switcher */}
-            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-950/80 rounded-xl border border-slate-800 text-xs font-bold">
+            <div className="grid grid-cols-2 gap-1 p-1 bg-[#f9f7f0] rounded-full border border-[#e7e5dc] text-xs font-bold">
               <button
                 type="button"
-                onClick={() => {
-                  setTrxType('income');
-                  setCategory('Gaji');
-                }}
-                className={`py-2 rounded-lg transition-all ${
-                  trxType === 'income'
-                    ? 'bg-emerald-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                onClick={() => { setTrxType('income'); setCategory('Gaji'); }}
+                className={`py-1.5 rounded-full transition ${trxType === 'income' ? 'bg-[#13426f] text-white shadow-sm' : 'text-[#616c8a]'}`}
               >
-                📈 Pemasukan (Income)
+                + Pemasukan
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setTrxType('expense');
-                  setCategory('Makan');
-                }}
-                className={`py-2 rounded-lg transition-all ${
-                  trxType === 'expense'
-                    ? 'bg-rose-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+                onClick={() => { setTrxType('expense'); setCategory('Makan'); }}
+                className={`py-1.5 rounded-full transition ${trxType === 'expense' ? 'bg-rose-600 text-white shadow-sm' : 'text-[#616c8a]'}`}
               >
-                💸 Pengeluaran (Outcome)
+                - Pengeluaran
               </button>
             </div>
 
-            <form onSubmit={handleAddTransaction} className="space-y-4">
-              {/* Category Pills */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400">Pilih Kategori</label>
-                <div className="flex flex-wrap gap-1.5">
-                  {(trxType === 'income' ? incomeCategories : expenseCategories).map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setCategory(cat)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                        category === cat
-                          ? trxType === 'income'
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-rose-600 text-white'
-                          : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
+            <form onSubmit={handleAddTransaction} className="space-y-3">
+              <div className="flex flex-wrap gap-1.5">
+                {(trxType === 'income' ? incomeCategories : expenseCategories).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategory(cat)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
+                      category === cat ? 'bg-[#13426f] text-white shadow-sm' : 'bg-[#f9f7f0] text-[#616c8a]'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
               </div>
 
-              {/* Amount Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400">Nominal Transaksi (Rp)</label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                    Rp
-                  </span>
-                  <input
-                    type="number"
-                    placeholder="Contoh: 50000"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-mono text-white placeholder:text-slate-500"
-                    required
-                  />
-                </div>
-              </div>
+              <input
+                type="number"
+                placeholder="Nominal (Rp)"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="relief-input w-full px-4 py-2 rounded-full text-xs font-mono font-bold"
+                required
+              />
 
-              {/* Description Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400">Keterangan / Catatan</label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Gaji Pokok, Nasi Padang, Bensin"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="glass-input w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder:text-slate-500"
-                  required
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Keterangan transaksi..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="relief-input w-full px-4 py-2 rounded-full text-xs font-medium"
+                required
+              />
 
-              {/* Date Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400">Tanggal Transaksi</label>
-                <input
-                  type="date"
-                  value={trxDate}
-                  onChange={(e) => setTrxDate(e.target.value)}
-                  className="glass-input w-full px-4 py-2 rounded-xl text-xs font-mono text-white bg-slate-900"
-                  required
-                />
-              </div>
+              <input
+                type="date"
+                value={trxDate}
+                onChange={(e) => setTrxDate(e.target.value)}
+                className="relief-input w-full px-4 py-1.5 rounded-full text-xs font-mono font-bold"
+                required
+              />
 
               <button
                 type="submit"
                 disabled={submitting || !amount || !description.trim()}
-                className={`w-full py-3 rounded-xl font-bold text-sm text-white shadow-lg transition-all active:scale-98 disabled:opacity-40 ${
-                  trxType === 'income'
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 shadow-glow-emerald'
-                    : 'bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 shadow-glow-amber'
-                }`}
+                className="w-full py-2.5 relief-btn-pop text-xs font-bold disabled:opacity-40"
               >
                 {submitting ? 'Menyimpan...' : `+ Simpan ${trxType === 'income' ? 'Pemasukan' : 'Pengeluaran'}`}
               </button>
             </form>
           </div>
+        </div>
 
-          {/* Transactions History Table (2 Cols) */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-5 lg:col-span-2 shadow-glass">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <span>📜 Rincian Riwayat Transaksi</span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono">
-                    {combinedTransactions.length} Transaksi
-                  </span>
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Daftar seluruh arus kas masuk & keluar pada periode terpilih
-                </p>
-              </div>
-            </div>
+        {/* Transactions Table */}
+        <div className="relief-card p-6 sm:p-7 space-y-4">
+          <h3 className="text-base font-extrabold text-[#13426f]">
+            📜 Riwayat Transaksi ({combinedTransactions.length})
+          </h3>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-800">
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-900/90 text-xs uppercase font-semibold text-slate-400 border-b border-slate-800">
+          <div className="overflow-x-auto rounded-2xl border border-[#e7e5dc]">
+            <table className="w-full text-left text-xs text-[#333333]">
+              <thead className="bg-[#f9f7f0] text-[11px] font-bold text-[#616c8a] border-b border-[#e7e5dc]">
+                <tr>
+                  <th className="py-3 px-4">Tanggal</th>
+                  <th className="py-3 px-4">Kategori</th>
+                  <th className="py-3 px-4">Keterangan</th>
+                  <th className="py-3 px-4 text-right">Nominal</th>
+                  <th className="py-3 px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e7e5dc]">
+                {combinedTransactions.length === 0 ? (
                   <tr>
-                    <th className="py-3.5 px-4">Tanggal</th>
-                    <th className="py-3.5 px-4">Tipe & Kategori</th>
-                    <th className="py-3.5 px-4">Keterangan</th>
-                    <th className="py-3.5 px-4 text-right">Nominal</th>
-                    <th className="py-3.5 px-4 text-right">Aksi</th>
+                    <td colSpan={5} className="py-8 text-center text-[#616c8a]">
+                      Belum ada transaksi di periode ini.
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 font-medium">
-                  {combinedTransactions.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-10 text-center text-slate-500 text-xs">
-                        Belum ada transaksi tercatat di periode ini.
-                      </td>
-                    </tr>
-                  ) : (
-                    combinedTransactions.map((trx) => {
-                      const isInc = trx.type === 'income';
-                      return (
-                        <tr key={`${trx.type}-${trx.id}`} className="hover:bg-slate-900/50 transition">
-                          <td className="py-3.5 px-4 text-xs font-mono text-slate-400">
-                            {trx.date}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span
-                              className={`text-[11px] px-2.5 py-1 rounded-full font-bold border ${
-                                isInc
-                                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
-                                  : 'bg-rose-950/60 border-rose-500/40 text-rose-300'
-                              }`}
-                            >
-                              {isInc ? '📈 Income' : '💸 Expense'} • {trx.category || 'Umum'}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-sm text-slate-200">
-                            {trx.description}
-                          </td>
-                          <td
-                            className={`py-3.5 px-4 text-right font-mono font-bold text-sm ${
-                              isInc ? 'text-emerald-400' : 'text-rose-400'
-                            }`}
+                ) : (
+                  combinedTransactions.map((trx) => {
+                    const isInc = trx.type === 'income';
+                    return (
+                      <tr key={`${trx.type}-${trx.id}`} className="hover:bg-[#f9f7f0] transition">
+                        <td className="py-3 px-4 font-mono text-[#616c8a]">{trx.date}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
+                            isInc ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                          }`}>
+                            {trx.category || 'Umum'}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-medium text-[#212121]">{trx.description}</td>
+                        <td className={`py-3 px-4 text-right font-mono font-bold ${isInc ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {isInc ? '+' : '-'}Rp {Number(trx.amount || 0).toLocaleString('id-ID')}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => deleteTransaction(trx.type, trx.id)}
+                            className="text-[#616c8a] hover:text-rose-600 font-bold p-1"
                           >
-                            {isInc ? '+' : '-'}Rp {Number(trx.amount || 0).toLocaleString('id-ID')}
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <button
-                              onClick={() => deleteTransaction(trx.type, trx.id)}
-                              title="Hapus Transaksi"
-                              className="p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-500 hover:text-rose-400 transition"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                            ✕
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </main>

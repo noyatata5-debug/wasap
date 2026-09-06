@@ -10,50 +10,44 @@ export default function Navbar() {
 
   if (!user) return null;
 
-  // Base navigation links visible to all members
+  // Base navigation links
   const navLinks = [
-    { href: '/', label: 'Workspace & Kalender', icon: '🏠' },
-    { href: '/finance', label: 'Personal Finance', icon: '📈' },
+    { href: '/', label: 'Workspace', icon: '🏠' },
+    { href: '/finance', label: 'Finance', icon: '📈' },
   ];
 
-  // Admin-only menu items
+  // Admin-only links
   if (user.role === 'admin') {
-    navLinks.push({ href: '/threads', label: 'Thread Admin (Yap)', icon: '🧵' });
+    navLinks.push({ href: '/threads', label: 'Thread Admin', icon: '🧵' });
     navLinks.push({ href: '/admin', label: 'User Admin', icon: '👑' });
   }
 
   return (
-    <nav className="glass-panel border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-xl">
+    <nav className="bg-white/90 backdrop-blur-md border-b border-[#e7e5dc] sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Brand / Logo */}
-          <div className="flex items-center gap-3">
+          {/* Brand Logo & Clean Navigation */}
+          <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-indigo-500 flex items-center justify-center text-slate-950 font-black shadow-glow-emerald group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-2xl bg-[#2e96ff] text-white flex items-center justify-center font-black shadow-[rgba(154,207,246,0.6)_0px_4px_0px_0px] group-hover:scale-105 transition-transform">
                 ⚡
               </div>
-              <div className="hidden sm:block">
-                <span className="font-extrabold text-base tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                  Wasap Hub
-                </span>
-                <span className="text-[10px] block text-emerald-400 font-mono -mt-1">
-                  +{user.phone_number}
-                </span>
-              </div>
+              <span className="font-extrabold text-lg tracking-tight text-[#13426f]">
+                Wasap
+              </span>
             </Link>
-
-            {/* Navigation Pills */}
-            <div className="hidden md:flex items-center gap-1.5 ml-4 bg-slate-950/60 p-1 rounded-2xl border border-slate-800">
+            {/* Desktop Navigation Links */}
+            <div className="hidden md:flex items-center gap-1.5 bg-[#f9f7f0] p-1 rounded-full border border-[#e7e5dc]">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
                       isActive
-                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80'
+                        ? 'bg-[#13426f] text-white shadow-sm'
+                        : 'text-[#616c8a] hover:text-[#13426f] hover:bg-white'
                     }`}
                   >
                     <span>{link.icon}</span>
@@ -64,9 +58,9 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* User Profile & Logout */}
+          {/* User Profile & Actions */}
           <div className="flex items-center gap-3">
-            {/* Mobile Nav Links Buttons */}
+            {/* Mobile Nav Icons */}
             <div className="flex md:hidden items-center gap-1">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
@@ -74,10 +68,10 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`p-2 rounded-xl text-sm transition ${
+                    className={`p-2 rounded-full text-sm transition ${
                       isActive
-                        ? 'bg-emerald-600/30 text-emerald-300 border border-emerald-500/40'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-[#13426f] text-white'
+                        : 'text-[#616c8a] hover:bg-[#f1ede1]'
                     }`}
                     title={link.label}
                   >
@@ -87,26 +81,30 @@ export default function Navbar() {
               })}
             </div>
 
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center text-[11px] font-bold text-slate-950">
+            {/* User Pill */}
+            <div className="flex items-center gap-2 pl-3 border-l border-[#e7e5dc]">
+              <div className="w-8 h-8 rounded-full bg-[#bde1f9] text-[#13426f] flex items-center justify-center text-xs font-bold font-mono">
                 {user.username.slice(0, 2).toUpperCase()}
               </div>
-              <div className="items-center gap-1.5 hidden lg:flex">
-                <span className="text-xs font-medium text-slate-300">
-                  @{user.username}
+              <div className="hidden sm:flex flex-col text-left">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-[#212121]">@{user.username}</span>
+                  {user.role === 'admin' && (
+                    <span className="text-[9px] uppercase font-bold px-1.5 py-0.2 rounded-full bg-[#bde1f9] text-[#13426f]">
+                      Admin
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] text-[#616c8a] font-mono -mt-0.5">
+                  +{user.phone_number}
                 </span>
-                {user.role === 'admin' && (
-                  <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    Admin
-                  </span>
-                )}
               </div>
               <button
                 onClick={() => {
                   logout();
                   router.push('/login');
                 }}
-                className="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-500/30 text-slate-400 hover:text-rose-300 text-xs font-medium transition"
+                className="ml-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-rose-50 border border-[#d0d5dd] hover:border-rose-300 text-[#616c8a] hover:text-rose-600 text-xs font-semibold transition shadow-sm active:scale-95"
               >
                 Logout
               </button>
@@ -117,3 +115,4 @@ export default function Navbar() {
     </nav>
   );
 }
+
