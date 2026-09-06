@@ -1,9 +1,10 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/authContext';
 import { supabase } from '../../lib/supabase';
 import Navbar from '../components/Navbar';
+import { exportFinanceToExcel } from '../../lib/exportExcel';
 
 export default function PersonalFinancePage() {
   const router = useRouter();
@@ -26,6 +27,9 @@ export default function PersonalFinancePage() {
   const [trxDate, setTrxDate] = useState(new Date().toISOString().split('T')[0]);
   const [submitting, setSubmitting] = useState(false);
 
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef(null);
+
   const incomeCategories = ['Gaji', 'Freelance', 'Bisnis', 'Investasi', 'Hadiah', 'Lainnya'];
   const expenseCategories = ['Makan', 'Transport', 'Belanja', 'Tagihan', 'Hiburan', 'Lainnya'];
 
@@ -44,6 +48,16 @@ export default function PersonalFinancePage() {
       router.push('/login');
     }
   }, [user, authLoading, router]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setIsExportMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (user && user.phone_number) {
@@ -87,6 +101,25 @@ export default function PersonalFinancePage() {
       if (showLoader) setLoading(false);
     }
   }
+
+  const handleExport = (exportType) => {
+    setIsExportMenuOpen(false);
+    try {
+      exportFinanceToExcel({
+        type: exportType,
+        user,
+        incomes,
+        expenses,
+        selectedYear,
+        selectedMonth,
+        monthNames,
+      });
+      showToast(`Laporan Excel (${exportType === 'monthly' ? 'Bulanan' : exportType === 'yearly' ? 'Tahunan' : 'Master'}) berhasil di-download! 📊`);
+    } catch (err) {
+      console.error(err);
+      showToast('Gagal men-generate file Excel', 'error');
+    }
+  };
 
   async function handleAddTransaction(e) {
     e.preventDefault();
@@ -139,9 +172,9 @@ export default function PersonalFinancePage() {
       const { error } = await supabase.from(table).delete().eq('id', id);
       if (error) throw error;
       if (type === 'income') {
-        setIncomes(prev => prev.filter(i => i.id !== id));
+        setIncomes((prev) => prev.filter((i) => i.id !== id));
       } else {
-        setExpenses(prev => prev.filter(e => e.id !== id));
+        setExpenses((prev) => prev.filter((e) => e.id !== id));
       }
       showToast('Transaksi dihapus');
     } catch (err) {
@@ -232,11 +265,13 @@ export default function PersonalFinancePage() {
       <Navbar />
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in ${
-          toast.type === 'error'
-            ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
-            : 'bg-[#13426f] dark:bg-[#0284c7] text-white border-transparent'
-        }`}>
+        <div
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in ${
+            toast.type === 'error'
+              ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
+              : 'bg-[#13426f] dark:bg-[#0284c7] text-white border-transparent'
+          }`}
+        >
           <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
           <span className="text-xs font-bold">{toast.message}</span>
         </div>
@@ -250,11 +285,75 @@ export default function PersonalFinancePage() {
               Personal Finance
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-              Rekap pemasukan, pengeluaran & grafik arus kas
+              Rekap pemasukan, pengeluaran, grafik arus kas & export Excel
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* EXPORT EXCEL DROPDOWN */}
+            <div className="relative" ref={exportMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition active:scale-95"
+              >
+                <span>📊</span>
+                <span>Export Excel</span>
+                <span className="text-[10px] opacity-80">▼</span>
+              </button>
+
+              {isExportMenuOpen && (
+                <div className="absolute right-0 mt-2 w-60 app-card shadow-2xl rounded-2xl p-2 z-50 animate-fade-in border border-[var(--border-color)]">
+                  <div className="px-3 py-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-color)] mb-1">
+                    Pilih Format Periode Excel
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExport('monthly')}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-left rounded-xl hover:bg-[var(--bg-subtle)] text-[var(--text-main)] transition"
+                  >
+                    <span className="text-base">📗</span>
+                    <div>
+                      <div>Laporan Bulanan</div>
+                      <div className="text-[10px] font-normal text-[var(--text-muted)]">
+                        {monthNames[selectedMonth]} {selectedYear}
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExport('yearly')}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-left rounded-xl hover:bg-[var(--bg-subtle)] text-[var(--text-main)] transition"
+                  >
+                    <span className="text-base">📘</span>
+                    <div>
+                      <div>Laporan Tahunan</div>
+                      <div className="text-[10px] font-normal text-[var(--text-muted)]">
+                        Tahun {selectedYear} (12 Bulan)
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleExport('all')}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-left rounded-xl hover:bg-[var(--bg-subtle)] text-[var(--text-main)] transition"
+                  >
+                    <span className="text-base">📙</span>
+                    <div>
+                      <div>Semua Riwayat (Master)</div>
+                      <div className="text-[10px] font-normal text-[var(--text-muted)]">
+                        Semua transaksi tercatat
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Filter Timeframe */}
             <div className="flex items-center gap-1 bg-[var(--bg-subtle)] p-1 rounded-full border border-[var(--border-color)] text-xs font-bold">
               {['daily', 'monthly', 'yearly'].map((t) => (
                 <button
