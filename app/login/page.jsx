@@ -53,17 +53,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f9f7f0] flex items-center justify-center p-4 selection:bg-[#2e96ff] selection:text-white">
-      <div className="relief-card w-full max-w-md p-8 sm:p-10 space-y-7 shadow-xl border border-[#e7e5dc]">
-        {/* Brand */}
+    <div className="min-h-screen bg-[var(--color-canvas)] flex items-center justify-center p-4 selection:bg-[#2e96ff] selection:text-white transition-colors duration-200">
+      <div className="relief-card bg-white dark:bg-slate-900 border border-[#e7e5dc] dark:border-slate-800 w-full max-w-md p-8 sm:p-10 space-y-7 shadow-xl rounded-3xl">
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-2xl bg-[#2e96ff] text-white flex items-center justify-center text-2xl font-bold mx-auto shadow-[rgba(154,207,246,0.6)_0px_5px_0px_0px]">
             ⚡
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-[#13426f]">
+          <h1 className="text-2xl font-black tracking-tight text-[#13426f] dark:text-[#38bdf8]">
             Wasap Hub
           </h1>
-          <p className="text-xs text-[#616c8a]">
+          <p className="text-xs text-[#616c8a] dark:text-slate-400">
             {isRegisterMode
               ? 'Daftarkan nomor WhatsApp & akun workspace Anda'
               : 'Masuk dengan Nomor WhatsApp atau Username'}
@@ -71,13 +70,13 @@ export default function LoginPage() {
         </div>
 
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold text-center">
+          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold text-center">
             ⚠️ {errorMsg}
           </div>
         )}
 
         {successMsg && (
-          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold text-center">
+          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center">
             ✅ {successMsg}
           </div>
         )}
@@ -86,7 +85,7 @@ export default function LoginPage() {
           {isRegisterMode ? (
             <>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#13426f]">Username</label>
+                <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Username</label>
                 <input
                   type="text"
                   placeholder="cenot"
@@ -98,7 +97,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#13426f]">Nomor WhatsApp</label>
+                <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Nomor WhatsApp</label>
                 <input
                   type="text"
                   placeholder="6289637779993"
@@ -111,7 +110,7 @@ export default function LoginPage() {
             </>
           ) : (
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#13426f]">Nomor WA / Username</label>
+              <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Nomor WA / Username</label>
               <input
                 type="text"
                 placeholder="6289637779993 atau cenot"
@@ -124,7 +123,7 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#13426f]">Password</label>
+            <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Password</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -144,7 +143,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="pt-3 border-t border-[#e7e5dc] text-center">
+        <div className="pt-3 border-t border-[#e7e5dc] dark:border-slate-800 text-center">
           <button
             type="button"
             onClick={() => {

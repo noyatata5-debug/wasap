@@ -112,7 +112,6 @@ export default function ThreadAdminPage() {
     }
   }
 
-  // Calendar
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth();
   const monthNamesIndo = [
@@ -169,7 +168,7 @@ export default function ThreadAdminPage() {
 
   if (authLoading || (!user && !authLoading)) {
     return (
-      <div className="min-h-screen bg-[#f9f7f0] flex items-center justify-center text-[#616c8a]">
+      <div className="min-h-screen bg-[var(--color-canvas)] flex items-center justify-center text-[#616c8a]">
         <div className="flex items-center gap-3">
           <span className="w-5 h-5 border-2 border-[#2e96ff] border-t-transparent rounded-full animate-spin" />
           <span className="font-semibold text-sm">Memuat Yap Planner...</span>
@@ -179,29 +178,28 @@ export default function ThreadAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f7f0] text-[#333333] pb-24">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-main)] pb-24 transition-colors duration-200">
       <Navbar />
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg bg-[#13426f] text-white text-xs font-bold">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg bg-[#13426f] dark:bg-[#2e96ff] text-white text-xs font-bold">
           <span>✅</span>
           <span>{toast.message}</span>
         </div>
       )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
-        {/* Header */}
         <div className="relief-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] dark:text-[#38bdf8] tracking-tight">
                 Thread Admin & Yap Planner
               </h1>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#bde1f9] text-[#13426f]">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#bde1f9] dark:bg-slate-800 text-[#13426f] dark:text-sky-300">
                 Admin Exclusive
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-[#616c8a]">
+            <p className="text-xs sm:text-sm text-[#616c8a] dark:text-slate-400">
               Jadwalkan postingan thread & auto-yap Hermes bot
             </p>
           </div>
@@ -214,25 +212,24 @@ export default function ThreadAdminPage() {
           </button>
         </div>
 
-        {/* Calendar Section */}
         <section className="relief-card p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#e7e5dc]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#e7e5dc] dark:border-slate-800">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#bde1f9] text-[#13426f] flex items-center justify-center font-bold text-lg shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-[#bde1f9] dark:bg-slate-800 text-[#13426f] dark:text-[#38bdf8] flex items-center justify-center font-bold text-lg shadow-sm">
                 🧵
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-[#13426f]">
+                <h2 className="text-xl font-extrabold text-[#13426f] dark:text-[#38bdf8]">
                   {monthNamesIndo[currentMonth]} {currentYear}
                 </h2>
-                <p className="text-xs text-[#616c8a]">Klik tanggal untuk menjadwalkan topik Yap</p>
+                <p className="text-xs text-[#616c8a] dark:text-slate-400">Klik tanggal untuk menjadwalkan topik Yap</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentDate(new Date(currentYear, currentMonth - 1, 1))}
-                className="p-2 rounded-full bg-white hover:bg-[#f1ede1] border border-[#d0d5dd] text-[#616c8a] text-xs font-bold"
+                className="p-2 rounded-full bg-white dark:bg-slate-800 hover:bg-[#f1ede1] dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 text-[#616c8a] dark:text-slate-300 text-xs font-bold transition"
               >
                 ◀
               </button>
@@ -241,27 +238,27 @@ export default function ThreadAdminPage() {
                   setCurrentDate(new Date());
                   setSelectedDate(today);
                 }}
-                className="px-4 py-1.5 rounded-full bg-[#f1ede1] hover:bg-white border border-[#d0d5dd] text-xs font-bold text-[#13426f]"
+                className="px-4 py-1.5 rounded-full bg-[#f1ede1] dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 text-xs font-bold text-[#13426f] dark:text-[#38bdf8] transition"
               >
                 Hari Ini
               </button>
               <button
                 onClick={() => setCurrentDate(new Date(currentYear, currentMonth + 1, 1))}
-                className="p-2 rounded-full bg-white hover:bg-[#f1ede1] border border-[#d0d5dd] text-[#616c8a] text-xs font-bold"
+                className="p-2 rounded-full bg-white dark:bg-slate-800 hover:bg-[#f1ede1] dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 text-[#616c8a] dark:text-slate-300 text-xs font-bold transition"
               >
                 ▶
               </button>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#e7e5dc] overflow-hidden bg-white shadow-sm">
-            <div className="grid grid-cols-7 bg-[#f9f7f0] border-b border-[#e7e5dc] text-center text-xs font-bold text-[#616c8a] uppercase py-3">
+          <div className="rounded-2xl border border-[#e7e5dc] dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
+            <div className="grid grid-cols-7 bg-[#f9f7f0] dark:bg-slate-800/80 border-b border-[#e7e5dc] dark:border-slate-800 text-center text-xs font-bold text-[#616c8a] dark:text-slate-400 uppercase py-3">
               {daysOfWeek.map((d) => (
                 <div key={d}>{d}</div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 divide-x divide-y divide-[#e7e5dc]">
+            <div className="grid grid-cols-7 divide-x divide-y divide-[#e7e5dc] dark:divide-slate-800">
               {calendarDays.map((item, idx) => {
                 const isToday = item.dateString === today;
                 const isSelected = item.dateString === selectedDate;
@@ -276,20 +273,20 @@ export default function ThreadAdminPage() {
                     }}
                     className={`min-h-[120px] p-2 transition flex flex-col justify-between cursor-pointer group ${
                       !item.isCurrentMonth
-                        ? 'bg-[#fcfbf7] text-[#c3cad9]'
+                        ? 'bg-[#fcfbf7] dark:bg-slate-950/40 text-[#c3cad9] dark:text-slate-700'
                         : isToday
-                        ? 'bg-[#bde1f9]/20'
-                        : 'hover:bg-[#f9f7f0]'
+                        ? 'bg-[#bde1f9]/20 dark:bg-sky-950/30'
+                        : 'hover:bg-[#f9f7f0] dark:hover:bg-slate-800/50'
                     } ${isSelected ? 'ring-2 ring-inset ring-[#2e96ff]' : ''}`}
                   >
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
-                        isToday ? 'bg-[#2e96ff] text-white shadow-sm' : 'text-[#333333]'
+                        isToday ? 'bg-[#2e96ff] text-white shadow-sm' : 'text-[#333333] dark:text-slate-300'
                       }`}>
                         {item.dayNumber}
                       </span>
                       {dayThreads.length > 0 && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#13426f] text-white">
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#13426f] dark:bg-[#2e96ff] text-white">
                           {dayThreads.length} Yap
                         </span>
                       )}
@@ -299,7 +296,7 @@ export default function ThreadAdminPage() {
                       {dayThreads.slice(0, 2).map((t) => (
                         <div
                           key={t.id}
-                          className="text-[10px] px-2 py-0.5 rounded-lg border border-[#bde1f9] bg-[#bde1f9]/40 text-[#13426f] font-bold truncate"
+                          className="text-[10px] px-2 py-0.5 rounded-lg border border-[#bde1f9] dark:border-sky-800 bg-[#bde1f9]/40 dark:bg-sky-900/40 text-[#13426f] dark:text-sky-300 font-bold truncate"
                         >
                           🧵 {t.title}
                         </div>
@@ -319,11 +316,11 @@ export default function ThreadAdminPage() {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          <div className="relief-card w-full max-w-xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-[#e7e5dc]">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="relief-card bg-white dark:bg-slate-900 border border-[#e7e5dc] dark:border-slate-700 w-full max-w-xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto rounded-3xl">
+            <div className="flex items-center justify-between pb-4 border-b border-[#e7e5dc] dark:border-slate-800">
               <div>
-                <h3 className="text-lg font-bold text-[#13426f]">
+                <h3 className="text-lg font-bold text-[#13426f] dark:text-[#38bdf8]">
                   Yap Tanggal:{' '}
                   <span className="text-[#2e96ff]">
                     {new Date(selectedDate + 'T00:00:00').toLocaleDateString('id-ID', {
@@ -337,18 +334,18 @@ export default function ThreadAdminPage() {
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-full hover:bg-[#f1ede1] text-[#616c8a] font-bold text-xs"
+                className="w-7 h-7 rounded-full bg-[#f1ede1] dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-[#616c8a] dark:text-slate-300 flex items-center justify-center text-xs font-bold transition"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase text-[#616c8a]">
+              <h4 className="text-xs font-bold uppercase text-[#616c8a] dark:text-slate-400">
                 Daftar Yap ({selectedDateThreads.length})
               </h4>
               {selectedDateThreads.length === 0 ? (
-                <div className="py-6 text-center text-xs text-[#616c8a] bg-[#f9f7f0] rounded-2xl border border-dashed border-[#d0d5dd]">
+                <div className="py-6 text-center text-xs text-[#616c8a] dark:text-slate-400 bg-[#f9f7f0] dark:bg-slate-800/40 rounded-2xl border border-dashed border-[#d0d5dd] dark:border-slate-700">
                   Belum ada jadwal Yap di tanggal ini.
                 </div>
               ) : (
@@ -356,26 +353,26 @@ export default function ThreadAdminPage() {
                   {selectedDateThreads.map((t) => (
                     <div
                       key={t.id}
-                      className="p-3 rounded-2xl bg-white border border-[#e7e5dc] space-y-1 shadow-sm"
+                      className="p-3 rounded-2xl bg-white dark:bg-slate-800/80 border border-[#e7e5dc] dark:border-slate-700 space-y-1 shadow-sm"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#13426f]">🧵 {t.title}</span>
+                        <span className="text-xs font-bold text-[#13426f] dark:text-[#38bdf8]">🧵 {t.title}</span>
                         <button
                           onClick={() => deleteThread(t.id)}
-                          className="text-xs text-[#616c8a] hover:text-rose-600 font-bold"
+                          className="text-xs text-[#616c8a] dark:text-slate-400 hover:text-rose-600 font-bold"
                         >
                           ✕
                         </button>
                       </div>
-                      <p className="text-xs text-[#616c8a] line-clamp-2 leading-relaxed">{t.content}</p>
+                      <p className="text-xs text-[#616c8a] dark:text-slate-400 line-clamp-2 leading-relaxed">{t.content}</p>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <form onSubmit={handleSaveThread} className="space-y-3 pt-3 border-t border-[#e7e5dc]">
-              <h4 className="text-xs font-bold text-[#13426f]">+ Tulis Naskah Yap Thread</h4>
+            <form onSubmit={handleSaveThread} className="space-y-3 pt-3 border-t border-[#e7e5dc] dark:border-slate-800">
+              <h4 className="text-xs font-bold text-[#13426f] dark:text-[#38bdf8]">+ Tulis Naskah Yap Thread</h4>
               <input
                 type="text"
                 placeholder="Hook / Topik Utama..."

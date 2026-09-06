@@ -14,10 +14,7 @@ export default function AdminPage() {
   const [dataLoading, setDataLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // State untuk intip password (menyimpan user ID yang sedang di-reveal)
   const [revealedPasswords, setRevealedPasswords] = useState({});
-
-  // Modal Reset Password Member oleh Admin
   const [resetModalUser, setResetModalUser] = useState(null);
   const [adminNewPassword, setAdminNewPassword] = useState('');
   const [submittingReset, setSubmittingReset] = useState(false);
@@ -55,7 +52,6 @@ export default function AdminPage() {
     }
   }
 
-  // Toggle intip password baris user
   const togglePasswordVisibility = (userId) => {
     setRevealedPasswords((prev) => ({
       ...prev,
@@ -91,7 +87,6 @@ export default function AdminPage() {
     }
   }
 
-  // Admin langsung mengganti/reset password member
   async function handleAdminResetPassword(e) {
     e.preventDefault();
     if (!resetModalUser || !adminNewPassword || adminNewPassword.length < 4) {
@@ -140,7 +135,7 @@ export default function AdminPage() {
 
   if (authLoading || (!user && !authLoading)) {
     return (
-      <div className="min-h-screen bg-[#f9f7f0] flex items-center justify-center text-[#616c8a]">
+      <div className="min-h-screen bg-[var(--color-canvas)] flex items-center justify-center text-[#616c8a]">
         <div className="flex items-center gap-3">
           <span className="w-5 h-5 border-2 border-[#2e96ff] border-t-transparent rounded-full animate-spin" />
           <span className="font-semibold text-sm">Memuat sesi Admin...</span>
@@ -150,13 +145,15 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f7f0] text-[#333333] pb-24">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-main)] pb-24 transition-colors duration-200">
       <Navbar />
 
       {toast && (
         <div
           className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in ${
-            toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-[#13426f] text-white'
+            toast.type === 'error'
+              ? 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300'
+              : 'bg-[#13426f] dark:bg-[#2e96ff] text-white border-transparent'
           }`}
         >
           <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
@@ -168,14 +165,14 @@ export default function AdminPage() {
         <div className="relief-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] dark:text-[#38bdf8] tracking-tight">
                 User & Access Control
               </h1>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#bde1f9] text-[#13426f]">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#bde1f9] dark:bg-slate-800 text-[#13426f] dark:text-sky-300">
                 {usersList.length} User Terdaftar
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-[#616c8a]">
+            <p className="text-xs sm:text-sm text-[#616c8a] dark:text-slate-400">
               Kelola role, intip password member, dan kontrol nomor WhatsApp
             </p>
           </div>
@@ -191,11 +188,10 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="relief-card p-6 sm:p-7 space-y-4">
-          <div className="overflow-x-auto rounded-2xl border border-[#e7e5dc]">
-            <table className="w-full text-left text-xs text-[#333333]">
-              <thead className="bg-[#f9f7f0] text-[11px] font-bold text-[#616c8a] border-b border-[#e7e5dc]">
+          <div className="overflow-x-auto rounded-2xl border border-[#e7e5dc] dark:border-slate-800">
+            <table className="w-full text-left text-xs text-[var(--color-text-main)]">
+              <thead className="bg-[#f9f7f0] dark:bg-slate-800/80 text-[11px] font-bold text-[#616c8a] dark:text-slate-400 border-b border-[#e7e5dc] dark:border-slate-800">
                 <tr>
                   <th className="py-3 px-4">User</th>
                   <th className="py-3 px-4">WhatsApp</th>
@@ -204,15 +200,15 @@ export default function AdminPage() {
                   <th className="py-3 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e7e5dc]">
+              <tbody className="divide-y divide-[#e7e5dc] dark:divide-slate-800">
                 {filteredUsers.map((u) => {
                   const isSelf = u.id === user.id;
                   const isRevealed = revealedPasswords[u.id];
                   const rawPass = u.password_raw || 'Tidak tercatat (Hash lama)';
 
                   return (
-                    <tr key={u.id} className="hover:bg-[#f9f7f0] transition">
-                      <td className="py-3 px-4 font-bold text-[#13426f]">
+                    <tr key={u.id} className="hover:bg-[#f9f7f0] dark:hover:bg-slate-800/50 transition">
+                      <td className="py-3 px-4 font-bold text-[#13426f] dark:text-slate-200">
                         @{u.username} {isSelf && '(Anda)'}
                       </td>
 
@@ -231,23 +227,22 @@ export default function AdminPage() {
                         <span
                           className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
                             u.role === 'admin'
-                              ? 'bg-[#bde1f9] text-[#13426f]'
-                              : 'bg-[#f1ede1] text-[#616c8a]'
+                              ? 'bg-[#bde1f9] dark:bg-slate-800 text-[#13426f] dark:text-sky-300'
+                              : 'bg-[#f1ede1] dark:bg-slate-800 text-[#616c8a] dark:text-slate-300'
                           }`}
                         >
                           {u.role === 'admin' ? '👑 Admin' : '👤 Member'}
                         </span>
                       </td>
 
-                      {/* Kolom Intip Password */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-xs text-[#13426f] bg-white px-2.5 py-1 rounded-lg border border-[#e7e5dc] min-w-[90px] inline-block text-center">
+                          <span className="font-mono font-bold text-xs text-[#13426f] dark:text-[#38bdf8] bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-[#e7e5dc] dark:border-slate-700 min-w-[90px] inline-block text-center">
                             {isRevealed ? rawPass : '••••••••'}
                           </span>
                           <button
                             onClick={() => togglePasswordVisibility(u.id)}
-                            className="p-1 text-xs hover:bg-[#f1ede1] rounded-md transition"
+                            className="p-1 text-xs hover:bg-[#f1ede1] dark:hover:bg-slate-700 rounded-md transition"
                             title={isRevealed ? 'Sembunyikan' : 'Intip Password'}
                           >
                             {isRevealed ? '🙈' : '👁️'}
@@ -255,7 +250,7 @@ export default function AdminPage() {
                           {isRevealed && u.password_raw && (
                             <button
                               onClick={() => copyPassword(u.password_raw)}
-                              className="p-1 text-xs hover:bg-[#f1ede1] rounded-md transition text-[#2e96ff] font-bold"
+                              className="p-1 text-xs hover:bg-[#f1ede1] dark:hover:bg-slate-700 rounded-md transition text-[#2e96ff] font-bold"
                               title="Salin Password"
                             >
                               📋
@@ -270,7 +265,7 @@ export default function AdminPage() {
                             setResetModalUser(u);
                             setAdminNewPassword('');
                           }}
-                          className="px-2.5 py-1 rounded-full bg-[#f1ede1] hover:bg-white border border-[#d0d5dd] font-bold text-[11px] text-[#13426f] transition"
+                          className="px-2.5 py-1 rounded-full bg-[#f1ede1] dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 font-bold text-[11px] text-[#13426f] dark:text-slate-200 transition"
                           title="Ganti password member ini"
                         >
                           🔑 Reset Pass
@@ -280,13 +275,13 @@ export default function AdminPage() {
                           <>
                             <button
                               onClick={() => toggleRole(u)}
-                              className="px-2.5 py-1 rounded-full bg-white hover:bg-[#f1ede1] border border-[#d0d5dd] font-bold text-[11px] transition"
+                              className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 hover:bg-[#f1ede1] dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 font-bold text-[11px] text-[#616c8a] dark:text-slate-300 transition"
                             >
                               {u.role === 'admin' ? 'Set as User' : 'Set as Admin'}
                             </button>
                             <button
                               onClick={() => deleteUser(u.id, u.username)}
-                              className="px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[11px] border border-rose-200 transition"
+                              className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 dark:text-rose-400 font-bold text-[11px] border border-rose-200 dark:border-rose-800 transition"
                             >
                               Hapus
                             </button>
@@ -304,16 +299,16 @@ export default function AdminPage() {
 
       {/* Modal Admin Reset Password Member */}
       {resetModalUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          <div className="relief-card w-full max-w-sm p-6 space-y-4 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-3 border-b border-[#e7e5dc]">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="relief-card bg-white dark:bg-slate-900 border border-[#e7e5dc] dark:border-slate-700 w-full max-w-sm p-6 space-y-4 shadow-2xl relative rounded-3xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e7e5dc] dark:border-slate-800">
               <div>
-                <h3 className="text-base font-extrabold text-[#13426f]">Reset Password Member</h3>
-                <p className="text-xs text-[#616c8a]">Untuk user: <strong>@{resetModalUser.username}</strong></p>
+                <h3 className="text-base font-extrabold text-[#13426f] dark:text-[#38bdf8]">Reset Password Member</h3>
+                <p className="text-xs text-[#616c8a] dark:text-slate-400">Untuk user: <strong>@{resetModalUser.username}</strong></p>
               </div>
               <button
                 onClick={() => setResetModalUser(null)}
-                className="p-1.5 rounded-full hover:bg-[#f1ede1] text-[#616c8a] text-xs font-bold"
+                className="w-7 h-7 rounded-full bg-[#f1ede1] dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-[#616c8a] dark:text-slate-300 flex items-center justify-center text-xs font-bold transition"
               >
                 ✕
               </button>
@@ -321,7 +316,7 @@ export default function AdminPage() {
 
             <form onSubmit={handleAdminResetPassword} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-[#13426f]">Password Baru Member</label>
+                <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Password Baru Member</label>
                 <input
                   type="text"
                   placeholder="Contoh: 123456"
