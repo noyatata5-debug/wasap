@@ -168,7 +168,7 @@ export default function ThreadAdminPage() {
 
   if (authLoading || (!user && !authLoading)) {
     return (
-      <div className="min-h-screen bg-[var(--color-canvas)] flex items-center justify-center text-[#616c8a]">
+      <div className="min-h-screen app-canvas flex items-center justify-center text-[var(--text-muted)]">
         <div className="flex items-center gap-3">
           <span className="w-5 h-5 border-2 border-[#2e96ff] border-t-transparent rounded-full animate-spin" />
           <span className="font-semibold text-sm">Memuat Yap Planner...</span>
@@ -178,87 +178,91 @@ export default function ThreadAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-main)] pb-24 transition-colors duration-200">
+    <div className="min-h-screen app-canvas text-[var(--text-main)] pb-24 transition-colors duration-200">
       <Navbar />
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg bg-[#13426f] dark:bg-[#2e96ff] text-white text-xs font-bold">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg bg-[#13426f] dark:bg-[#0284c7] text-white text-xs font-bold">
           <span>✅</span>
           <span>{toast.message}</span>
         </div>
       )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
-        <div className="relief-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="app-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] dark:text-[#38bdf8] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-title)] tracking-tight">
                 Thread Admin & Yap Planner
               </h1>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#bde1f9] dark:bg-slate-800 text-[#13426f] dark:text-sky-300">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full app-badge-highlight">
                 Admin Exclusive
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-[#616c8a] dark:text-slate-400">
+            <p className="text-xs sm:text-sm text-[var(--text-muted)]">
               Jadwalkan postingan thread & auto-yap Hermes bot
             </p>
           </div>
 
           <button
+            type="button"
             onClick={() => setIsModalOpen(true)}
-            className="px-5 py-2.5 relief-btn-pop text-xs font-bold"
+            className="px-5 py-2.5 app-btn-pop text-xs font-bold"
           >
             + Jadwalkan Yap Thread
           </button>
         </div>
 
-        <section className="relief-card p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#e7e5dc] dark:border-slate-800">
+        <section className="app-card p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--border-color)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#bde1f9] dark:bg-slate-800 text-[#13426f] dark:text-[#38bdf8] flex items-center justify-center font-bold text-lg shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--bg-subtle)] text-[var(--text-title)] flex items-center justify-center font-bold text-lg shadow-sm">
                 🧵
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-[#13426f] dark:text-[#38bdf8]">
+                <h2 className="text-xl font-extrabold text-[var(--text-title)]">
                   {monthNamesIndo[currentMonth]} {currentYear}
                 </h2>
-                <p className="text-xs text-[#616c8a] dark:text-slate-400">Klik tanggal untuk menjadwalkan topik Yap</p>
+                <p className="text-xs text-[var(--text-muted)]">Klik tanggal untuk menjadwalkan topik Yap</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => setCurrentDate(new Date(currentYear, currentMonth - 1, 1))}
-                className="p-2 rounded-full bg-white dark:bg-slate-800 hover:bg-[#f1ede1] dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 text-[#616c8a] dark:text-slate-300 text-xs font-bold transition"
+                className="p-2 rounded-full app-card hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] text-xs font-bold transition"
               >
                 ◀
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setCurrentDate(new Date());
                   setSelectedDate(today);
                 }}
-                className="px-4 py-1.5 rounded-full bg-[#f1ede1] dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 text-xs font-bold text-[#13426f] dark:text-[#38bdf8] transition"
+                className="px-4 py-1.5 rounded-full app-card hover:bg-[var(--bg-subtle)] text-xs font-bold text-[var(--text-title)] transition"
               >
                 Hari Ini
               </button>
               <button
+                type="button"
                 onClick={() => setCurrentDate(new Date(currentYear, currentMonth + 1, 1))}
-                className="p-2 rounded-full bg-white dark:bg-slate-800 hover:bg-[#f1ede1] dark:hover:bg-slate-700 border border-[#d0d5dd] dark:border-slate-700 text-[#616c8a] dark:text-slate-300 text-xs font-bold transition"
+                className="p-2 rounded-full app-card hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] text-xs font-bold transition"
               >
                 ▶
               </button>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#e7e5dc] dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-sm">
-            <div className="grid grid-cols-7 bg-[#f9f7f0] dark:bg-slate-800/80 border-b border-[#e7e5dc] dark:border-slate-800 text-center text-xs font-bold text-[#616c8a] dark:text-slate-400 uppercase py-3">
+          <div className="rounded-2xl border border-[var(--border-color)] overflow-hidden bg-[var(--bg-card)] shadow-sm">
+            <div className="grid grid-cols-7 bg-[var(--bg-subtle)] border-b border-[var(--border-color)] text-center text-xs font-bold text-[var(--text-muted)] uppercase py-3">
               {daysOfWeek.map((d) => (
                 <div key={d}>{d}</div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 divide-x divide-y divide-[#e7e5dc] dark:divide-slate-800">
+            <div className="grid grid-cols-7 divide-x divide-y divide-[var(--border-color)]">
               {calendarDays.map((item, idx) => {
                 const isToday = item.dateString === today;
                 const isSelected = item.dateString === selectedDate;
@@ -273,20 +277,20 @@ export default function ThreadAdminPage() {
                     }}
                     className={`min-h-[120px] p-2 transition flex flex-col justify-between cursor-pointer group ${
                       !item.isCurrentMonth
-                        ? 'bg-[#fcfbf7] dark:bg-slate-950/40 text-[#c3cad9] dark:text-slate-700'
+                        ? 'opacity-30 bg-[var(--bg-subtle)]'
                         : isToday
-                        ? 'bg-[#bde1f9]/20 dark:bg-sky-950/30'
-                        : 'hover:bg-[#f9f7f0] dark:hover:bg-slate-800/50'
+                        ? 'bg-[#2e96ff]/10'
+                        : 'hover:bg-[var(--bg-subtle)]'
                     } ${isSelected ? 'ring-2 ring-inset ring-[#2e96ff]' : ''}`}
                   >
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
-                        isToday ? 'bg-[#2e96ff] text-white shadow-sm' : 'text-[#333333] dark:text-slate-300'
+                        isToday ? 'bg-[#2e96ff] text-white shadow-sm' : 'text-[var(--text-main)]'
                       }`}>
                         {item.dayNumber}
                       </span>
                       {dayThreads.length > 0 && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#13426f] dark:bg-[#2e96ff] text-white">
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#13426f] dark:bg-[#0284c7] text-white">
                           {dayThreads.length} Yap
                         </span>
                       )}
@@ -296,7 +300,7 @@ export default function ThreadAdminPage() {
                       {dayThreads.slice(0, 2).map((t) => (
                         <div
                           key={t.id}
-                          className="text-[10px] px-2 py-0.5 rounded-lg border border-[#bde1f9] dark:border-sky-800 bg-[#bde1f9]/40 dark:bg-sky-900/40 text-[#13426f] dark:text-sky-300 font-bold truncate"
+                          className="text-[10px] px-2 py-0.5 rounded-lg border app-badge-highlight font-bold truncate"
                         >
                           🧵 {t.title}
                         </div>
@@ -316,11 +320,11 @@ export default function ThreadAdminPage() {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="relief-card bg-white dark:bg-slate-900 border border-[#e7e5dc] dark:border-slate-700 w-full max-w-xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto rounded-3xl">
-            <div className="flex items-center justify-between pb-4 border-b border-[#e7e5dc] dark:border-slate-800">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+          <div className="app-card w-full max-w-xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
               <div>
-                <h3 className="text-lg font-bold text-[#13426f] dark:text-[#38bdf8]">
+                <h3 className="text-lg font-bold text-[var(--text-title)]">
                   Yap Tanggal:{' '}
                   <span className="text-[#2e96ff]">
                     {new Date(selectedDate + 'T00:00:00').toLocaleDateString('id-ID', {
@@ -333,19 +337,20 @@ export default function ThreadAdminPage() {
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="w-7 h-7 rounded-full bg-[#f1ede1] dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-[#616c8a] dark:text-slate-300 flex items-center justify-center text-xs font-bold transition"
+                className="w-7 h-7 rounded-full bg-[var(--bg-subtle)] hover:bg-rose-500/20 text-[var(--text-muted)] hover:text-rose-500 flex items-center justify-center text-xs font-bold transition"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase text-[#616c8a] dark:text-slate-400">
+              <h4 className="text-xs font-bold uppercase text-[var(--text-muted)]">
                 Daftar Yap ({selectedDateThreads.length})
               </h4>
               {selectedDateThreads.length === 0 ? (
-                <div className="py-6 text-center text-xs text-[#616c8a] dark:text-slate-400 bg-[#f9f7f0] dark:bg-slate-800/40 rounded-2xl border border-dashed border-[#d0d5dd] dark:border-slate-700">
+                <div className="py-6 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] rounded-2xl border border-dashed border-[var(--border-color)]">
                   Belum ada jadwal Yap di tanggal ini.
                 </div>
               ) : (
@@ -353,32 +358,33 @@ export default function ThreadAdminPage() {
                   {selectedDateThreads.map((t) => (
                     <div
                       key={t.id}
-                      className="p-3 rounded-2xl bg-white dark:bg-slate-800/80 border border-[#e7e5dc] dark:border-slate-700 space-y-1 shadow-sm"
+                      className="p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1 shadow-sm"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-[#13426f] dark:text-[#38bdf8]">🧵 {t.title}</span>
+                        <span className="text-xs font-bold text-[var(--text-title)]">🧵 {t.title}</span>
                         <button
+                          type="button"
                           onClick={() => deleteThread(t.id)}
-                          className="text-xs text-[#616c8a] dark:text-slate-400 hover:text-rose-600 font-bold"
+                          className="text-xs text-[var(--text-muted)] hover:text-rose-500 font-bold"
                         >
                           ✕
                         </button>
                       </div>
-                      <p className="text-xs text-[#616c8a] dark:text-slate-400 line-clamp-2 leading-relaxed">{t.content}</p>
+                      <p className="text-xs text-[var(--text-muted)] line-clamp-2 leading-relaxed">{t.content}</p>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <form onSubmit={handleSaveThread} className="space-y-3 pt-3 border-t border-[#e7e5dc] dark:border-slate-800">
-              <h4 className="text-xs font-bold text-[#13426f] dark:text-[#38bdf8]">+ Tulis Naskah Yap Thread</h4>
+            <form onSubmit={handleSaveThread} className="space-y-3 pt-3 border-t border-[var(--border-color)]">
+              <h4 className="text-xs font-bold text-[var(--text-title)]">+ Tulis Naskah Yap Thread</h4>
               <input
                 type="text"
                 placeholder="Hook / Topik Utama..."
                 value={threadTitle}
                 onChange={(e) => setThreadTitle(e.target.value)}
-                className="relief-input w-full px-4 py-2 rounded-full text-xs font-bold"
+                className="app-input w-full px-4 py-2 rounded-full text-xs font-bold"
                 required
               />
 
@@ -387,7 +393,7 @@ export default function ThreadAdminPage() {
                 placeholder="Tulis isi thread lengkap di sini..."
                 value={threadContent}
                 onChange={(e) => setThreadContent(e.target.value)}
-                className="relief-input w-full px-4 py-2 rounded-2xl text-xs resize-none"
+                className="app-input w-full px-4 py-2 rounded-2xl text-xs resize-none"
                 required
               />
 
@@ -395,7 +401,7 @@ export default function ThreadAdminPage() {
                 <select
                   value={threadCategory}
                   onChange={(e) => setThreadCategory(e.target.value)}
-                  className="relief-input px-3 py-1.5 rounded-full text-xs font-bold"
+                  className="app-input px-3 py-1.5 rounded-full text-xs font-bold"
                 >
                   {categories.map((c) => (
                     <option key={c.key} value={c.key}>{c.icon} {c.label}</option>
@@ -406,7 +412,7 @@ export default function ThreadAdminPage() {
                   type="time"
                   value={scheduledTime}
                   onChange={(e) => setScheduledTime(e.target.value)}
-                  className="relief-input px-3 py-1.5 rounded-full text-xs font-mono font-bold"
+                  className="app-input px-3 py-1.5 rounded-full text-xs font-mono font-bold"
                   required
                 />
               </div>
@@ -414,7 +420,7 @@ export default function ThreadAdminPage() {
               <button
                 type="submit"
                 disabled={submitting || !threadTitle.trim() || !threadContent.trim()}
-                className="w-full py-2.5 relief-btn-pop text-xs font-bold disabled:opacity-40"
+                className="w-full py-2.5 app-btn-pop text-xs font-bold disabled:opacity-40"
               >
                 {submitting ? 'Menyimpan...' : '+ Jadwalkan Yap'}
               </button>

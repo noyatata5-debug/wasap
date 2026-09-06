@@ -9,12 +9,10 @@ export default function Dashboard() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
-  // Data States
   const [tasks, setTasks] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Form Inputs
   const [taskTitle, setTaskTitle] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [isReminder, setIsReminder] = useState(false);
@@ -25,14 +23,12 @@ export default function Dashboard() {
   const [expenseDesc, setExpenseDesc] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Makan');
 
-  // Submit states
   const [submittingTask, setSubmittingTask] = useState(false);
   const [submittingExpense, setSubmittingExpense] = useState(false);
   const [submittingDraft, setSubmittingDraft] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [toast, setToast] = useState(null);
 
-  // Calendar State
   const [calendarDate, setCalendarDate] = useState(new Date());
   const [selectedCalDate, setSelectedCalDate] = useState(new Date().toISOString().split('T')[0]);
   const [isCalModalOpen, setIsCalModalOpen] = useState(false);
@@ -76,7 +72,6 @@ export default function Dashboard() {
     return new Date().toLocaleDateString('id-ID', options);
   }, []);
 
-  // Fetch data & Supabase realtime subscription
   useEffect(() => {
     if (user && user.phone_number) {
       fetchData();
@@ -102,7 +97,7 @@ export default function Dashboard() {
     if (showLoader) setLoading(true);
 
     try {
-      const [{ data: tasksData, error: tErr }, { data: expData, error: eErr }] = await Promise.all([
+      const [{ data: tasksData }, { data: expData }] = await Promise.all([
         supabase
           .from('tasks')
           .select('*')
@@ -115,9 +110,6 @@ export default function Dashboard() {
           .order('id', { ascending: false }),
       ]);
 
-      if (tErr) console.error('Error fetching tasks:', tErr);
-      if (eErr) console.error('Error fetching expenses:', eErr);
-
       if (tasksData) setTasks(tasksData);
       if (expData) setExpenses(expData);
     } catch (err) {
@@ -127,7 +119,6 @@ export default function Dashboard() {
     }
   }
 
-  // --- ACTIONS ---
   async function addTask(e, customDate = null) {
     if (e) e.preventDefault();
     if (!taskTitle.trim() || !user) return;
@@ -266,7 +257,6 @@ export default function Dashboard() {
     }
   }
 
-  // --- FILTERED DATA ---
   const todayTasks = useMemo(() => {
     return tasks.filter((t) => {
       const matchesDate = t.task_date === today;
@@ -288,7 +278,6 @@ export default function Dashboard() {
     return todayExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
   }, [todayExpenses]);
 
-  // --- CALENDAR GENERATOR LOGIC ---
   const currentYear = calendarDate.getFullYear();
   const currentMonth = calendarDate.getMonth();
   const monthNamesIndo = [
@@ -344,7 +333,7 @@ export default function Dashboard() {
 
   if (authLoading || (!user && !authLoading)) {
     return (
-      <div className="min-h-screen bg-[#f9f7f0] flex items-center justify-center text-[#616c8a]">
+      <div className="min-h-screen app-canvas flex items-center justify-center text-[var(--text-muted)]">
         <div className="flex items-center gap-3">
           <span className="w-5 h-5 border-2 border-[#2e96ff] border-t-transparent rounded-full animate-spin" />
           <span className="font-semibold text-sm">Memuat Workspace...</span>
@@ -354,16 +343,15 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f7f0] text-[#333333] pb-24">
+    <div className="min-h-screen app-canvas text-[var(--text-main)] pb-24 transition-colors duration-200">
       <Navbar />
 
-      {/* Toast Feedback */}
       {toast && (
         <div
           className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in ${
             toast.type === 'error'
-              ? 'bg-rose-50 border-rose-200 text-rose-700'
-              : 'bg-[#13426f] border-[#13426f] text-white'
+              ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
+              : 'bg-[#13426f] dark:bg-[#0284c7] text-white border-transparent'
           }`}
         >
           <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
@@ -372,30 +360,31 @@ export default function Dashboard() {
       )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
-        {/* Clean Dashboard Header */}
-        <div className="relief-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Header */}
+        <div className="app-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-title)] tracking-tight">
               Daily Workspace
             </h1>
-            <p className="text-xs sm:text-sm text-[#616c8a] flex items-center gap-2">
+            <p className="text-xs sm:text-sm text-[var(--text-muted)] flex items-center gap-2">
               <span className="capitalize">{formattedDate}</span>
               <span>•</span>
-              <span className="font-mono font-bold text-[#13426f]">{currentTime} WIB</span>
+              <span className="font-mono font-bold text-[var(--text-title)]">{currentTime} WIB</span>
             </p>
           </div>
 
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#f1ede1] border border-[#e7e5dc] text-xs font-bold text-[#13426f]">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full app-badge-subtle text-xs font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>WhatsApp Sync Active</span>
             </div>
             <button
+              type="button"
               onClick={() => {
                 fetchData(true);
                 showToast('Data diperbarui! 🔄');
               }}
-              className="p-2 rounded-full bg-white hover:bg-[#f1ede1] border border-[#d0d5dd] text-[#616c8a] transition active:scale-95"
+              className="p-2 rounded-full app-card hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] transition active:scale-95"
               title="Refresh Data"
             >
               🔄
@@ -405,21 +394,24 @@ export default function Dashboard() {
 
         {/* 3 Action Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Kolom 1: Agenda & Target Hari Ini */}
-          <div className="relief-card p-6 space-y-4 flex flex-col justify-between">
+          {/* Agenda Hari Ini */}
+          <div className="app-card p-6 space-y-4 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🎯</span>
-                  <h2 className="font-extrabold text-base text-[#13426f]">Agenda Hari Ini</h2>
+                  <h2 className="font-extrabold text-base text-[var(--text-title)]">Agenda Hari Ini</h2>
                 </div>
-                <div className="flex items-center gap-1 bg-[#f9f7f0] p-1 rounded-full border border-[#e7e5dc] text-[11px] font-bold">
+                <div className="flex items-center gap-1 bg-[var(--bg-subtle)] p-1 rounded-full border border-[var(--border-color)] text-[11px] font-bold">
                   {['all', 'pending', 'done'].map((f) => (
                     <button
                       key={f}
+                      type="button"
                       onClick={() => setTaskFilter(f)}
                       className={`px-2.5 py-1 rounded-full capitalize transition ${
-                        taskFilter === f ? 'bg-[#13426f] text-white' : 'text-[#616c8a] hover:text-[#13426f]'
+                        taskFilter === f
+                          ? 'bg-[#13426f] dark:bg-[#0284c7] text-white'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                       }`}
                     >
                       {f === 'all' ? 'Semua' : f}
@@ -428,7 +420,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Form Input Task */}
               <form onSubmit={addTask} className="space-y-2">
                 <div className="relative">
                   <input
@@ -436,13 +427,13 @@ export default function Dashboard() {
                     placeholder="Tambah agenda hari ini..."
                     value={taskTitle}
                     onChange={(e) => setTaskTitle(e.target.value)}
-                    className="relief-input w-full pl-4 pr-24 py-2.5 rounded-full text-xs font-medium"
+                    className="app-input w-full pl-4 pr-24 py-2.5 rounded-full text-xs font-medium"
                     required
                   />
                   <button
                     type="submit"
                     disabled={submittingTask || !taskTitle.trim()}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 relief-btn-pop text-xs font-bold disabled:opacity-40"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 app-btn-pop text-xs font-bold disabled:opacity-40"
                   >
                     {submittingTask ? '...' : '+ Tambah'}
                   </button>
@@ -453,9 +444,9 @@ export default function Dashboard() {
                     type="time"
                     value={dueTime}
                     onChange={(e) => setDueTime(e.target.value)}
-                    className="relief-input px-3 py-1 rounded-full text-[11px] font-mono"
+                    className="app-input px-3 py-1 rounded-full text-[11px] font-mono"
                   />
-                  <label className="flex items-center gap-1 text-[11px] text-[#616c8a] cursor-pointer font-medium">
+                  <label className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] cursor-pointer font-medium">
                     <input
                       type="checkbox"
                       checked={isReminder}
@@ -467,10 +458,9 @@ export default function Dashboard() {
                 </div>
               </form>
 
-              {/* List Agenda */}
               <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                 {todayTasks.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-[#616c8a] bg-[#f9f7f0] rounded-2xl border border-dashed border-[#d0d5dd]">
+                  <div className="py-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] rounded-2xl border border-dashed border-[var(--border-color)]">
                     Belum ada agenda hari ini.
                   </div>
                 ) : (
@@ -480,28 +470,29 @@ export default function Dashboard() {
                       onClick={() => toggleTaskStatus(t.id, t.status)}
                       className={`p-3 rounded-2xl border transition flex items-center justify-between gap-3 cursor-pointer ${
                         t.status === 'done'
-                          ? 'bg-[#f1ede1]/60 border-[#e7e5dc] opacity-60 line-through'
-                          : 'bg-white border-[#e7e5dc] hover:border-[#2e96ff] shadow-sm'
+                          ? 'bg-[var(--bg-subtle)] opacity-60 line-through border-[var(--border-color)]'
+                          : 'bg-[var(--bg-card)] border-[var(--border-color)] hover:border-[#2e96ff]'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${
-                          t.status === 'done' ? 'bg-[#2e96ff] border-[#2e96ff] text-white' : 'border-[#d0d5dd]'
+                          t.status === 'done' ? 'bg-[#2e96ff] border-[#2e96ff] text-white' : 'border-[var(--border-input)]'
                         }`}>
                           {t.status === 'done' && '✓'}
                         </span>
-                        <span className="text-xs font-semibold text-[#212121] truncate">{t.title}</span>
+                        <span className="text-xs font-semibold text-[var(--text-main)] truncate">{t.title}</span>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
                         {t.due_time && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#bde1f9] text-[#13426f] font-bold">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full app-badge-highlight font-bold">
                             ⏰ {t.due_time.slice(0, 5)}
                           </span>
                         )}
                         <button
+                          type="button"
                           onClick={(e) => deleteTask(t.id, e)}
-                          className="text-[#616c8a] hover:text-rose-600 text-xs p-1"
+                          className="text-[var(--text-muted)] hover:text-rose-500 text-xs p-1"
                           title="Hapus"
                         >
                           ✕
@@ -514,15 +505,15 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Kolom 2: Draft Ide & Coretan Cepat */}
-          <div className="relief-card p-6 space-y-4 flex flex-col justify-between">
+          {/* Draft Ide */}
+          <div className="app-card p-6 space-y-4 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">💡</span>
-                  <h2 className="font-extrabold text-base text-[#13426f]">Draft Ide Cepat</h2>
+                  <h2 className="font-extrabold text-base text-[var(--text-title)]">Draft Ide Cepat</h2>
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#f1ede1] text-[#616c8a]">
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full app-badge-subtle">
                   {draftTasks.length} Ide
                 </span>
               </div>
@@ -533,13 +524,13 @@ export default function Dashboard() {
                   placeholder="Ketik ide / catatan singkat..."
                   value={draftTitle}
                   onChange={(e) => setDraftTitle(e.target.value)}
-                  className="relief-input w-full pl-4 pr-24 py-2.5 rounded-full text-xs font-medium"
+                  className="app-input w-full pl-4 pr-24 py-2.5 rounded-full text-xs font-medium"
                   required
                 />
                 <button
                   type="submit"
                   disabled={submittingDraft || !draftTitle.trim()}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 relief-btn-pop text-xs font-bold disabled:opacity-40"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 app-btn-pop text-xs font-bold disabled:opacity-40"
                 >
                   {submittingDraft ? '...' : '+ Simpan'}
                 </button>
@@ -547,19 +538,20 @@ export default function Dashboard() {
 
               <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                 {draftTasks.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-[#616c8a] bg-[#f9f7f0] rounded-2xl border border-dashed border-[#d0d5dd]">
+                  <div className="py-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] rounded-2xl border border-dashed border-[var(--border-color)]">
                     Belum ada draft ide.
                   </div>
                 ) : (
                   draftTasks.map((d) => (
                     <div
                       key={d.id}
-                      className="p-3 rounded-2xl bg-white border border-[#e7e5dc] shadow-sm flex items-center justify-between gap-2"
+                      className="p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between gap-2"
                     >
-                      <span className="text-xs font-medium text-[#212121] leading-relaxed">{d.title}</span>
+                      <span className="text-xs font-medium text-[var(--text-main)] leading-relaxed">{d.title}</span>
                       <button
+                        type="button"
                         onClick={(e) => deleteTask(d.id, e)}
-                        className="text-[#616c8a] hover:text-rose-600 text-xs p-1"
+                        className="text-[var(--text-muted)] hover:text-rose-500 text-xs p-1"
                         title="Hapus"
                       >
                         ✕
@@ -571,33 +563,35 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Kolom 3: Catat Pengeluaran Cepat */}
-          <div className="relief-card p-6 space-y-4 flex flex-col justify-between">
+          {/* Pengeluaran Cepat */}
+          <div className="app-card p-6 space-y-4 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">💸</span>
-                  <h2 className="font-extrabold text-base text-[#13426f]">Pengeluaran Hari Ini</h2>
+                  <h2 className="font-extrabold text-base text-[var(--text-title)]">Pengeluaran Hari Ini</h2>
                 </div>
-                <span className="text-xs font-black font-mono text-[#13426f] bg-[#bde1f9] px-2.5 py-0.5 rounded-full">
+                <span className="text-xs font-black font-mono text-[var(--text-title)] bg-[var(--bg-subtle)] px-2.5 py-0.5 rounded-full">
                   Rp {todayExpenseTotal.toLocaleString('id-ID')}
                 </span>
               </div>
 
               <form onSubmit={addExpense} className="space-y-2.5">
                 <div className="flex flex-wrap gap-1.5">
-                  {categories.map((cat) => (<button
+                  {categories.map((cat) => (
+                    <button
                       key={cat.label}
                       type="button"
                       onClick={() => setSelectedCategory(cat.label)}
                       className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
                         selectedCategory === cat.label
-                          ? 'bg-[#13426f] text-white shadow-sm'
-                          : 'bg-[#f9f7f0] text-[#616c8a] hover:text-[#13426f]'
+                          ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                          : 'bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
                       }`}
                     >
                       {cat.icon} {cat.label}
-                    </button>))}
+                    </button>
+                  ))}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -606,7 +600,7 @@ export default function Dashboard() {
                     placeholder="Nominal (Rp)"
                     value={expenseAmount}
                     onChange={(e) => setExpenseAmount(e.target.value)}
-                    className="relief-input px-3.5 py-2 rounded-full text-xs font-mono font-bold"
+                    className="app-input px-3.5 py-2 rounded-full text-xs font-mono font-bold"
                     required
                   />
                   <input
@@ -614,7 +608,7 @@ export default function Dashboard() {
                     placeholder="Keterangan..."
                     value={expenseDesc}
                     onChange={(e) => setExpenseDesc(e.target.value)}
-                    className="relief-input px-3.5 py-2 rounded-full text-xs"
+                    className="app-input px-3.5 py-2 rounded-full text-xs"
                     required
                   />
                 </div>
@@ -622,7 +616,7 @@ export default function Dashboard() {
                 <button
                   type="submit"
                   disabled={submittingExpense || !expenseAmount || !expenseDesc.trim()}
-                  className="w-full py-2.5 relief-btn-pop text-xs font-bold disabled:opacity-40"
+                  className="w-full py-2.5 app-btn-pop text-xs font-bold disabled:opacity-40"
                 >
                   {submittingExpense ? 'Menyimpan...' : '+ Catat Pengeluaran'}
                 </button>
@@ -630,21 +624,22 @@ export default function Dashboard() {
 
               <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                 {todayExpenses.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-[#616c8a] bg-[#f9f7f0] rounded-2xl border border-dashed border-[#d0d5dd]">
+                  <div className="py-6 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] rounded-2xl border border-dashed border-[var(--border-color)]">
                     Belum ada pengeluaran hari ini.
                   </div>
                 ) : (
                   todayExpenses.map((exp) => (
                     <div
                       key={exp.id}
-                      className="p-2.5 rounded-2xl bg-white border border-[#e7e5dc] shadow-sm flex items-center justify-between text-xs"
+                      className="p-2.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between text-xs"
                     >
-                      <span className="text-[#333333] font-medium truncate max-w-[170px]">{exp.description}</span>
+                      <span className="text-[var(--text-main)] font-medium truncate max-w-[170px]">{exp.description}</span>
                       <div className="flex items-center gap-2 shrink-0 font-mono">
-                        <span className="font-bold text-rose-600">-Rp {Number(exp.amount).toLocaleString('id-ID')}</span>
+                        <span className="font-bold text-rose-500">-Rp {Number(exp.amount).toLocaleString('id-ID')}</span>
                         <button
+                          type="button"
                           onClick={() => deleteExpense(exp.id)}
-                          className="text-[#616c8a] hover:text-rose-600 text-xs"
+                          className="text-[var(--text-muted)] hover:text-rose-500 text-xs"
                         >
                           ✕
                         </button>
@@ -657,18 +652,18 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Big Relief Calendar Section */}
-        <section className="relief-card p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#e7e5dc]">
+        {/* Calendar Section */}
+        <section className="app-card p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--border-color)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#bde1f9] text-[#13426f] flex items-center justify-center font-bold text-lg shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-[var(--bg-subtle)] text-[var(--text-title)] flex items-center justify-center font-bold text-lg shadow-sm">
                 🗓️
               </div>
               <div>
-                <h2 className="text-xl font-extrabold text-[#13426f]">
+                <h2 className="text-xl font-extrabold text-[var(--text-title)]">
                   Kalender Agenda — {monthNamesIndo[currentMonth]} {currentYear}
                 </h2>
-                <p className="text-xs text-[#616c8a]">
+                <p className="text-xs text-[var(--text-muted)]">
                   Klik kotak tanggal untuk melihat atau membuat agenda baru
                 </p>
               </div>
@@ -676,23 +671,26 @@ export default function Dashboard() {
 
             <div className="flex items-center gap-2">
               <button
+                type="button"
                 onClick={() => setCalendarDate(new Date(currentYear, currentMonth - 1, 1))}
-                className="p-2 rounded-full bg-white hover:bg-[#f1ede1] border border-[#d0d5dd] text-[#616c8a] text-xs font-bold transition"
+                className="p-2 rounded-full app-card hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] text-xs font-bold transition"
               >
                 ◀
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setCalendarDate(new Date());
                   setSelectedCalDate(today);
                 }}
-                className="px-4 py-1.5 rounded-full bg-[#f1ede1] hover:bg-white border border-[#d0d5dd] text-xs font-bold text-[#13426f] transition"
+                className="px-4 py-1.5 rounded-full app-card hover:bg-[var(--bg-subtle)] text-xs font-bold text-[var(--text-title)] transition"
               >
                 Hari Ini
               </button>
               <button
+                type="button"
                 onClick={() => setCalendarDate(new Date(currentYear, currentMonth + 1, 1))}
-                className="p-2 rounded-full bg-white hover:bg-[#f1ede1] border border-[#d0d5dd] text-[#616c8a] text-xs font-bold transition"
+                className="p-2 rounded-full app-card hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] text-xs font-bold transition"
               >
                 ▶
               </button>
@@ -700,14 +698,14 @@ export default function Dashboard() {
           </div>
 
           {/* Calendar Grid */}
-          <div className="rounded-2xl border border-[#e7e5dc] overflow-hidden bg-white shadow-sm">
-            <div className="grid grid-cols-7 bg-[#f9f7f0] border-b border-[#e7e5dc] text-center text-xs font-bold text-[#616c8a] uppercase py-3">
+          <div className="rounded-2xl border border-[var(--border-color)] overflow-hidden bg-[var(--bg-card)] shadow-sm">
+            <div className="grid grid-cols-7 bg-[var(--bg-subtle)] border-b border-[var(--border-color)] text-center text-xs font-bold text-[var(--text-muted)] uppercase py-3">
               {daysOfWeek.map((d) => (
                 <div key={d}>{d}</div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 divide-x divide-y divide-[#e7e5dc]">
+            <div className="grid grid-cols-7 divide-x divide-y divide-[var(--border-color)]">
               {calendarDays.map((item, idx) => {
                 const isToday = item.dateString === today;
                 const isSelected = item.dateString === selectedCalDate;
@@ -722,10 +720,10 @@ export default function Dashboard() {
                     }}
                     className={`min-h-[110px] p-2 transition flex flex-col justify-between cursor-pointer group ${
                       !item.isCurrentMonth
-                        ? 'bg-[#fcfbf7] text-[#c3cad9]'
+                        ? 'opacity-30 bg-[var(--bg-subtle)]'
                         : isToday
-                        ? 'bg-[#bde1f9]/20'
-                        : 'hover:bg-[#f9f7f0]'
+                        ? 'bg-[#2e96ff]/10'
+                        : 'hover:bg-[var(--bg-subtle)]'
                     } ${isSelected ? 'ring-2 ring-inset ring-[#2e96ff]' : ''}`}
                   >
                     <div className="flex items-center justify-between">
@@ -733,13 +731,13 @@ export default function Dashboard() {
                         className={`text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center ${
                           isToday
                             ? 'bg-[#2e96ff] text-white shadow-sm'
-                            : 'text-[#333333]'
+                            : 'text-[var(--text-main)]'
                         }`}
                       >
                         {item.dayNumber}
                       </span>
                       {dayTasks.length > 0 && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#13426f] text-white">
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#13426f] dark:bg-[#0284c7] text-white">
                           {dayTasks.length}
                         </span>
                       )}
@@ -751,8 +749,8 @@ export default function Dashboard() {
                           key={t.id}
                           className={`text-[10px] px-2 py-0.5 rounded-lg border font-medium truncate ${
                             t.status === 'done'
-                              ? 'bg-[#f1ede1] text-[#616c8a] line-through border-[#e7e5dc]'
-                              : 'bg-[#bde1f9]/40 text-[#13426f] border-[#bde1f9]'
+                              ? 'bg-[var(--bg-subtle)] text-[var(--text-muted)] line-through border-[var(--border-color)]'
+                              : 'app-badge-highlight font-bold'
                           }`}
                         >
                           {t.title}
@@ -765,7 +763,7 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    <div className="text-[9px] text-[#616c8a] opacity-0 group-hover:opacity-100 transition flex justify-end">
+                    <div className="text-[9px] text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition flex justify-end">
                       <span className="text-[#2e96ff] font-bold">+ Agenda</span>
                     </div>
                   </div>
@@ -776,13 +774,13 @@ export default function Dashboard() {
         </section>
       </main>
 
-      {/* Date Detail & Agenda Modal */}
+      {/* Agenda Detail Modal */}
       {isCalModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          <div className="relief-card w-full max-w-xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-[#e7e5dc]">
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+          <div className="app-card w-full max-w-xl p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border-color)]">
               <div>
-                <h3 className="text-lg font-bold text-[#13426f]">
+                <h3 className="text-lg font-bold text-[var(--text-title)]">
                   Agenda Tanggal:{' '}
                   <span className="text-[#2e96ff]">
                     {new Date(selectedCalDate + 'T00:00:00').toLocaleDateString('id-ID', {
@@ -795,19 +793,20 @@ export default function Dashboard() {
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setIsCalModalOpen(false)}
-                className="p-1.5 rounded-full hover:bg-[#f1ede1] text-[#616c8a] font-bold text-xs"
+                className="w-7 h-7 rounded-full bg-[var(--bg-subtle)] hover:bg-rose-500/20 text-[var(--text-muted)] hover:text-rose-500 flex items-center justify-center text-xs font-bold transition"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase text-[#616c8a]">
+              <h4 className="text-xs font-bold uppercase text-[var(--text-muted)]">
                 Daftar Agenda ({selectedCalDateTasks.length})
               </h4>
               {selectedCalDateTasks.length === 0 ? (
-                <div className="py-6 text-center text-xs text-[#616c8a] bg-[#f9f7f0] rounded-2xl border border-dashed border-[#d0d5dd]">
+                <div className="py-6 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-subtle)] rounded-2xl border border-dashed border-[var(--border-color)]">
                   Tidak ada agenda di tanggal ini.
                 </div>
               ) : (
@@ -815,21 +814,22 @@ export default function Dashboard() {
                   {selectedCalDateTasks.map((t) => (
                     <div
                       key={t.id}
-                      className="p-3 rounded-2xl bg-white border border-[#e7e5dc] flex items-center justify-between shadow-sm"
+                      className="p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-sm"
                     >
                       <div className="flex items-center gap-2">
                         <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${
-                          t.status === 'done' ? 'bg-[#2e96ff] text-white border-[#2e96ff]' : 'border-[#d0d5dd]'
+                          t.status === 'done' ? 'bg-[#2e96ff] text-white border-[#2e96ff]' : 'border-[var(--border-input)]'
                         }`}>
                           {t.status === 'done' && '✓'}
                         </span>
-                        <span className={`text-xs font-medium ${t.status === 'done' ? 'line-through text-[#616c8a]' : 'text-[#212121]'}`}>
+                        <span className={`text-xs font-medium ${t.status === 'done' ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-main)]'}`}>
                           {t.title}
                         </span>
                       </div>
                       <button
+                        type="button"
                         onClick={(e) => deleteTask(t.id, e)}
-                        className="text-xs text-[#616c8a] hover:text-rose-600"
+                        className="text-xs text-[var(--text-muted)] hover:text-rose-500"
                       >
                         ✕
                       </button>
@@ -843,22 +843,22 @@ export default function Dashboard() {
               onSubmit={(e) => {
                 addTask(e, selectedCalDate);
               }}
-              className="space-y-3 pt-3 border-t border-[#e7e5dc]"
+              className="space-y-3 pt-3 border-t border-[var(--border-color)]"
             >
-              <h4 className="text-xs font-bold text-[#13426f]">+ Tambah Agenda di Tanggal Ini</h4>
+              <h4 className="text-xs font-bold text-[var(--text-title)]">+ Tambah Agenda di Tanggal Ini</h4>
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Ketik nama agenda..."
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="relief-input flex-1 px-4 py-2 rounded-full text-xs font-medium"
+                  className="app-input flex-1 px-4 py-2 rounded-full text-xs font-medium"
                   required
                 />
                 <button
                   type="submit"
                   disabled={submittingTask || !taskTitle.trim()}
-                  className="px-5 py-2 relief-btn-pop text-xs font-bold disabled:opacity-40"
+                  className="px-5 py-2 app-btn-pop text-xs font-bold disabled:opacity-40"
                 >
                   {submittingTask ? '...' : '+ Tambah'}
                 </button>

@@ -218,7 +218,7 @@ export default function PersonalFinancePage() {
 
   if (authLoading || (!user && !authLoading)) {
     return (
-      <div className="min-h-screen bg-[var(--color-canvas)] flex items-center justify-center text-[#616c8a]">
+      <div className="min-h-screen app-canvas flex items-center justify-center text-[var(--text-muted)]">
         <div className="flex items-center gap-3">
           <span className="w-5 h-5 border-2 border-[#2e96ff] border-t-transparent rounded-full animate-spin" />
           <span className="font-semibold text-sm">Memuat Finance...</span>
@@ -228,14 +228,14 @@ export default function PersonalFinancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-main)] pb-24 transition-colors duration-200">
+    <div className="min-h-screen app-canvas text-[var(--text-main)] pb-24 transition-colors duration-200">
       <Navbar />
 
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in ${
           toast.type === 'error'
-            ? 'bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300'
-            : 'bg-[#13426f] dark:bg-[#2e96ff] text-white border-transparent'
+            ? 'bg-rose-500/20 border-rose-500/40 text-rose-400'
+            : 'bg-[#13426f] dark:bg-[#0284c7] text-white border-transparent'
         }`}>
           <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
           <span className="text-xs font-bold">{toast.message}</span>
@@ -244,26 +244,27 @@ export default function PersonalFinancePage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
         {/* Header */}
-        <div className="relief-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="app-card p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#13426f] dark:text-[#38bdf8] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-title)] tracking-tight">
               Personal Finance
             </h1>
-            <p className="text-xs sm:text-sm text-[#616c8a] dark:text-slate-400">
+            <p className="text-xs sm:text-sm text-[var(--text-muted)]">
               Rekap pemasukan, pengeluaran & grafik arus kas
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 bg-[#f9f7f0] dark:bg-slate-800 p-1 rounded-full border border-[#e7e5dc] dark:border-slate-700 text-xs font-bold">
+            <div className="flex items-center gap-1 bg-[var(--bg-subtle)] p-1 rounded-full border border-[var(--border-color)] text-xs font-bold">
               {['daily', 'monthly', 'yearly'].map((t) => (
                 <button
                   key={t}
+                  type="button"
                   onClick={() => setTimeframe(t)}
                   className={`px-3 py-1.5 rounded-full capitalize transition ${
                     timeframe === t
-                      ? 'bg-[#13426f] dark:bg-[#2e96ff] text-white shadow-sm'
-                      : 'text-[#616c8a] dark:text-slate-400 hover:text-[#13426f] dark:hover:text-white'
+                      ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'
                   }`}
                 >
                   {t === 'daily' ? 'Harian' : t === 'monthly' ? 'Bulanan' : 'Tahunan'}
@@ -276,7 +277,7 @@ export default function PersonalFinancePage() {
                 type="date"
                 value={selectedDateStr}
                 onChange={(e) => setSelectedDateStr(e.target.value)}
-                className="relief-input px-3 py-1.5 rounded-full text-xs font-mono font-bold"
+                className="app-input px-3 py-1.5 rounded-full text-xs font-mono font-bold"
               />
             )}
 
@@ -285,7 +286,7 @@ export default function PersonalFinancePage() {
                 <select
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                  className="relief-input px-3 py-1.5 rounded-full text-xs font-bold"
+                  className="app-input px-3 py-1.5 rounded-full text-xs font-bold"
                 >
                   {monthNames.map((m, idx) => (
                     <option key={m} value={idx}>{m}</option>
@@ -294,7 +295,7 @@ export default function PersonalFinancePage() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="relief-input px-3 py-1.5 rounded-full text-xs font-bold"
+                  className="app-input px-3 py-1.5 rounded-full text-xs font-bold"
                 >
                   {[2024, 2025, 2026, 2027].map((y) => (
                     <option key={y} value={y}>{y}</option>
@@ -307,32 +308,32 @@ export default function PersonalFinancePage() {
 
         {/* 4 Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="relief-card p-5 space-y-1">
-            <span className="text-xs font-bold uppercase text-emerald-600 dark:text-emerald-400">Pemasukan (Income)</span>
-            <p className="text-2xl font-black font-mono text-[#13426f] dark:text-[#38bdf8]">Rp {totalIncome.toLocaleString('id-ID')}</p>
-            <p className="text-[11px] text-[#616c8a] dark:text-slate-400">{filteredIncomes.length} transaksi</p>
+          <div className="app-card p-5 space-y-1">
+            <span className="text-xs font-bold uppercase text-emerald-500">Pemasukan (Income)</span>
+            <p className="text-2xl font-black font-mono text-[var(--text-title)]">Rp {totalIncome.toLocaleString('id-ID')}</p>
+            <p className="text-[11px] text-[var(--text-muted)]">{filteredIncomes.length} transaksi</p>
           </div>
 
-          <div className="relief-card p-5 space-y-1">
-            <span className="text-xs font-bold uppercase text-rose-600 dark:text-rose-400">Pengeluaran (Expense)</span>
-            <p className="text-2xl font-black font-mono text-rose-600 dark:text-rose-400">Rp {totalExpense.toLocaleString('id-ID')}</p>
-            <p className="text-[11px] text-[#616c8a] dark:text-slate-400">{filteredExpenses.length} transaksi</p>
+          <div className="app-card p-5 space-y-1">
+            <span className="text-xs font-bold uppercase text-rose-500">Pengeluaran (Expense)</span>
+            <p className="text-2xl font-black font-mono text-rose-500">Rp {totalExpense.toLocaleString('id-ID')}</p>
+            <p className="text-[11px] text-[var(--text-muted)]">{filteredExpenses.length} transaksi</p>
           </div>
 
-          <div className="relief-card p-5 space-y-1">
-            <span className="text-xs font-bold uppercase text-[#13426f] dark:text-[#38bdf8]">Saldo Bersih (Net)</span>
+          <div className="app-card p-5 space-y-1">
+            <span className="text-xs font-bold uppercase text-[var(--text-title)]">Saldo Bersih (Net)</span>
             <p className={`text-2xl font-black font-mono ${
-              netSavings >= 0 ? 'text-[#13426f] dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+              netSavings >= 0 ? 'text-emerald-500' : 'text-amber-500'
             }`}>
               {netSavings < 0 ? '-' : '+'}Rp {Math.abs(netSavings).toLocaleString('id-ID')}
             </p>
-            <p className="text-[11px] text-[#616c8a] dark:text-slate-400">{netSavings >= 0 ? 'Surplus Kas' : 'Defisit Arus Kas'}</p>
+            <p className="text-[11px] text-[var(--text-muted)]">{netSavings >= 0 ? 'Surplus Kas' : 'Defisit Arus Kas'}</p>
           </div>
 
-          <div className="relief-card p-5 space-y-1">
+          <div className="app-card p-5 space-y-1">
             <span className="text-xs font-bold uppercase text-[#2e96ff]">Savings Rate</span>
             <p className="text-2xl font-black text-[#2e96ff]">{savingsRate}%</p>
-            <div className="w-full bg-[#f1ede1] dark:bg-slate-800 h-2 rounded-full overflow-hidden mt-2">
+            <div className="w-full bg-[var(--bg-subtle)] h-2 rounded-full overflow-hidden mt-2">
               <div className="bg-[#2e96ff] h-full rounded-full" style={{ width: `${Math.min(savingsRate, 100)}%` }} />
             </div>
           </div>
@@ -341,18 +342,18 @@ export default function PersonalFinancePage() {
         {/* Chart & Form Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Monthly Bar Chart */}
-          <div className="relief-card p-6 sm:p-7 space-y-5 lg:col-span-2">
+          <div className="app-card p-6 sm:p-7 space-y-5 lg:col-span-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-[#13426f] dark:text-[#38bdf8]">
+              <h3 className="text-base font-extrabold text-[var(--text-title)]">
                 📊 Arus Kas Bulanan ({selectedYear})
               </h3>
               <div className="flex items-center gap-3 text-xs font-bold">
-                <span className="text-emerald-600 dark:text-emerald-400">● Income</span>
-                <span className="text-rose-600 dark:text-rose-400">● Expense</span>
+                <span className="text-emerald-500">● Income</span>
+                <span className="text-rose-500">● Expense</span>
               </div>
             </div>
 
-            <div className="pt-6 pb-2 grid grid-cols-12 gap-2 items-end min-h-[220px] border-b border-[#e7e5dc] dark:border-slate-800">
+            <div className="pt-6 pb-2 grid grid-cols-12 gap-2 items-end min-h-[220px] border-b border-[var(--border-color)]">
               {monthlyChartData.map((d, idx) => {
                 const incHeight = maxChartValue > 0 ? (d.income / maxChartValue) * 140 : 0;
                 const expHeight = maxChartValue > 0 ? (d.expense / maxChartValue) * 140 : 0;
@@ -363,7 +364,7 @@ export default function PersonalFinancePage() {
                       <div className="w-2.5 bg-emerald-500 rounded-t-md" style={{ height: `${Math.max(incHeight, 2)}px` }} />
                       <div className="w-2.5 bg-rose-500 rounded-t-md" style={{ height: `${Math.max(expHeight, 2)}px` }} />
                     </div>
-                    <span className={`text-[10px] font-bold ${idx === selectedMonth ? 'text-[#2e96ff]' : 'text-[#616c8a] dark:text-slate-400'}`}>
+                    <span className={`text-[10px] font-bold ${idx === selectedMonth ? 'text-[#2e96ff]' : 'text-[var(--text-muted)]'}`}>
                       {d.month}
                     </span>
                   </div>
@@ -373,17 +374,17 @@ export default function PersonalFinancePage() {
           </div>
 
           {/* Form Transaksi */}
-          <div className="relief-card p-6 space-y-4">
-            <h3 className="text-base font-extrabold text-[#13426f] dark:text-[#38bdf8]">+ Catat Transaksi</h3>
+          <div className="app-card p-6 space-y-4">
+            <h3 className="text-base font-extrabold text-[var(--text-title)]">+ Catat Transaksi</h3>
 
-            <div className="grid grid-cols-2 gap-1 p-1 bg-[#f9f7f0] dark:bg-slate-800 rounded-full border border-[#e7e5dc] dark:border-slate-700 text-xs font-bold">
+            <div className="grid grid-cols-2 gap-1 p-1 bg-[var(--bg-subtle)] rounded-full border border-[var(--border-color)] text-xs font-bold">
               <button
                 type="button"
                 onClick={() => { setTrxType('income'); setCategory('Gaji'); }}
                 className={`py-1.5 rounded-full transition ${
                   trxType === 'income'
-                    ? 'bg-[#13426f] dark:bg-[#2e96ff] text-white shadow-sm'
-                    : 'text-[#616c8a] dark:text-slate-400'
+                    ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                    : 'text-[var(--text-muted)]'
                 }`}
               >
                 + Pemasukan
@@ -394,7 +395,7 @@ export default function PersonalFinancePage() {
                 className={`py-1.5 rounded-full transition ${
                   trxType === 'expense'
                     ? 'bg-rose-600 text-white shadow-sm'
-                    : 'text-[#616c8a] dark:text-slate-400'
+                    : 'text-[var(--text-muted)]'
                 }`}
               >
                 - Pengeluaran
@@ -410,8 +411,8 @@ export default function PersonalFinancePage() {
                     onClick={() => setCategory(cat)}
                     className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
                       category === cat
-                        ? 'bg-[#13426f] dark:bg-[#2e96ff] text-white shadow-sm'
-                        : 'bg-[#f9f7f0] dark:bg-slate-800 text-[#616c8a] dark:text-slate-400'
+                        ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                        : 'bg-[var(--bg-subtle)] text-[var(--text-muted)]'
                     }`}
                   >
                     {cat}
@@ -424,7 +425,7 @@ export default function PersonalFinancePage() {
                 placeholder="Nominal (Rp)"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="relief-input w-full px-4 py-2 rounded-full text-xs font-mono font-bold"
+                className="app-input w-full px-4 py-2 rounded-full text-xs font-mono font-bold"
                 required
               />
 
@@ -433,7 +434,7 @@ export default function PersonalFinancePage() {
                 placeholder="Keterangan transaksi..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="relief-input w-full px-4 py-2 rounded-full text-xs font-medium"
+                className="app-input w-full px-4 py-2 rounded-full text-xs font-medium"
                 required
               />
 
@@ -441,14 +442,14 @@ export default function PersonalFinancePage() {
                 type="date"
                 value={trxDate}
                 onChange={(e) => setTrxDate(e.target.value)}
-                className="relief-input w-full px-4 py-1.5 rounded-full text-xs font-mono font-bold"
+                className="app-input w-full px-4 py-1.5 rounded-full text-xs font-mono font-bold"
                 required
               />
 
               <button
                 type="submit"
                 disabled={submitting || !amount || !description.trim()}
-                className="w-full py-2.5 relief-btn-pop text-xs font-bold disabled:opacity-40"
+                className="w-full py-2.5 app-btn-pop text-xs font-bold disabled:opacity-40"
               >
                 {submitting ? 'Menyimpan...' : `+ Simpan ${trxType === 'income' ? 'Pemasukan' : 'Pengeluaran'}`}
               </button>
@@ -457,14 +458,14 @@ export default function PersonalFinancePage() {
         </div>
 
         {/* Transactions Table */}
-        <div className="relief-card p-6 sm:p-7 space-y-4">
-          <h3 className="text-base font-extrabold text-[#13426f] dark:text-[#38bdf8]">
+        <div className="app-card p-6 sm:p-7 space-y-4">
+          <h3 className="text-base font-extrabold text-[var(--text-title)]">
             📜 Riwayat Transaksi ({combinedTransactions.length})
           </h3>
 
-          <div className="overflow-x-auto rounded-2xl border border-[#e7e5dc] dark:border-slate-800">
-            <table className="w-full text-left text-xs text-[var(--color-text-main)]">
-              <thead className="bg-[#f9f7f0] dark:bg-slate-800/80 text-[11px] font-bold text-[#616c8a] dark:text-slate-400 border-b border-[#e7e5dc] dark:border-slate-800">
+          <div className="overflow-x-auto rounded-2xl border border-[var(--border-color)]">
+            <table className="w-full text-left text-xs text-[var(--text-main)]">
+              <thead className="bg-[var(--bg-subtle)] text-[11px] font-bold text-[var(--text-muted)] border-b border-[var(--border-color)]">
                 <tr>
                   <th className="py-3 px-4">Tanggal</th>
                   <th className="py-3 px-4">Kategori</th>
@@ -473,10 +474,10 @@ export default function PersonalFinancePage() {
                   <th className="py-3 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e7e5dc] dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--border-color)]">
                 {combinedTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-[#616c8a] dark:text-slate-400">
+                    <td colSpan={5} className="py-8 text-center text-[var(--text-muted)]">
                       Belum ada transaksi di periode ini.
                     </td>
                   </tr>
@@ -484,25 +485,26 @@ export default function PersonalFinancePage() {
                   combinedTransactions.map((trx) => {
                     const isInc = trx.type === 'income';
                     return (
-                      <tr key={`${trx.type}-${trx.id}`} className="hover:bg-[#f9f7f0] dark:hover:bg-slate-800/50 transition">
-                        <td className="py-3 px-4 font-mono text-[#616c8a] dark:text-slate-400">{trx.date}</td>
+                      <tr key={`${trx.type}-${trx.id}`} className="hover:bg-[var(--bg-subtle)] transition">
+                        <td className="py-3 px-4 font-mono text-[var(--text-muted)]">{trx.date}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
                             isInc
-                              ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
-                              : 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300'
+                              ? 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/30'
+                              : 'bg-rose-500/15 text-rose-500 border border-rose-500/30'
                           }`}>
                             {trx.category || 'Umum'}
                           </span>
                         </td>
-                        <td className="py-3 px-4 font-medium text-[#212121] dark:text-slate-200">{trx.description}</td>
-                        <td className={`py-3 px-4 text-right font-mono font-bold ${isInc ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                        <td className="py-3 px-4 font-medium text-[var(--text-main)]">{trx.description}</td>
+                        <td className={`py-3 px-4 text-right font-mono font-bold ${isInc ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {isInc ? '+' : '-'}Rp {Number(trx.amount || 0).toLocaleString('id-ID')}
                         </td>
                         <td className="py-3 px-4 text-right">
                           <button
+                            type="button"
                             onClick={() => deleteTransaction(trx.type, trx.id)}
-                            className="text-[#616c8a] dark:text-slate-400 hover:text-rose-600 font-bold p-1"
+                            className="text-[var(--text-muted)] hover:text-rose-500 font-bold p-1"
                           >
                             ✕
                           </button>

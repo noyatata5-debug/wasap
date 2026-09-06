@@ -53,16 +53,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-canvas)] flex items-center justify-center p-4 selection:bg-[#2e96ff] selection:text-white transition-colors duration-200">
-      <div className="relief-card bg-white dark:bg-slate-900 border border-[#e7e5dc] dark:border-slate-800 w-full max-w-md p-8 sm:p-10 space-y-7 shadow-xl rounded-3xl">
+    <div className="min-h-screen app-canvas flex items-center justify-center p-4 transition-colors duration-200">
+      <div className="app-card w-full max-w-md p-8 sm:p-10 space-y-7 shadow-2xl relative">
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-2xl bg-[#2e96ff] text-white flex items-center justify-center text-2xl font-bold mx-auto shadow-[rgba(154,207,246,0.6)_0px_5px_0px_0px]">
             ⚡
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-[#13426f] dark:text-[#38bdf8]">
+          <h1 className="text-2xl font-black tracking-tight text-[var(--text-title)]">
             Wasap Hub
           </h1>
-          <p className="text-xs text-[#616c8a] dark:text-slate-400">
+          <p className="text-xs text-[var(--text-muted)]">
             {isRegisterMode
               ? 'Daftarkan nomor WhatsApp & akun workspace Anda'
               : 'Masuk dengan Nomor WhatsApp atau Username'}
@@ -70,13 +70,13 @@ export default function LoginPage() {
         </div>
 
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold text-center">
+          <div className="p-3.5 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold text-center">
             ⚠️ {errorMsg}
           </div>
         )}
 
         {successMsg && (
-          <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold text-center">
+          <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold text-center">
             ✅ {successMsg}
           </div>
         )}
@@ -85,51 +85,51 @@ export default function LoginPage() {
           {isRegisterMode ? (
             <>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Username</label>
+                <label className="text-xs font-bold text-[var(--text-main)]">Username</label>
                 <input
                   type="text"
                   placeholder="cenot"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="relief-input w-full px-4 py-2.5 rounded-full text-xs font-medium"
+                  className="app-input w-full px-4 py-2.5 rounded-full text-xs font-medium"
                   required
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Nomor WhatsApp</label>
+                <label className="text-xs font-bold text-[var(--text-main)]">Nomor WhatsApp</label>
                 <input
                   type="text"
                   placeholder="6289637779993"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="relief-input w-full px-4 py-2.5 rounded-full text-xs font-mono font-bold"
+                  className="app-input w-full px-4 py-2.5 rounded-full text-xs font-mono font-bold"
                   required
                 />
               </div>
             </>
           ) : (
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Nomor WA / Username</label>
+              <label className="text-xs font-bold text-[var(--text-main)]">Nomor WA / Username</label>
               <input
                 type="text"
                 placeholder="6289637779993 atau cenot"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                className="relief-input w-full px-4 py-2.5 rounded-full text-xs font-medium"
+                className="app-input w-full px-4 py-2.5 rounded-full text-xs font-medium"
                 required
               />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#13426f] dark:text-slate-300">Password</label>
+            <label className="text-xs font-bold text-[var(--text-main)]">Password</label>
             <input
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="relief-input w-full px-4 py-2.5 rounded-full text-xs"
+              className="app-input w-full px-4 py-2.5 rounded-full text-xs"
               required
             />
           </div>
@@ -137,13 +137,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 relief-btn-pop text-xs font-bold uppercase tracking-wider disabled:opacity-50 mt-2"
+            className="w-full py-3 app-btn-pop text-xs font-bold uppercase tracking-wider disabled:opacity-50 mt-2"
           >
             {loading ? 'Memproses...' : isRegisterMode ? 'Daftar Sekarang' : 'Masuk ke Workspace'}
           </button>
         </form>
 
-        <div className="pt-3 border-t border-[#e7e5dc] dark:border-slate-800 text-center">
+        <div className="pt-3 border-t border-[var(--border-color)] text-center">
           <button
             type="button"
             onClick={() => {
