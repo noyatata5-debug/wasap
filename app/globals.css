@@ -1,6 +1,106 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* LIGHT (RELIEF THEME) VARIABLES */
+:root {
+  --color-canvas: #f9f7f0;
+  --color-card-bg: #ffffff;
+  --color-card-border: #e7e5dc;
+  --color-text-main: #333333;
+  --color-text-title: #13426f;
+  --color-text-muted: #616c8a;
+  --color-subtle-bg: #f1ede1;
+  --color-nav-bg: rgba(255, 255, 255, 0.92);
+  --color-input-bg: #ffffff;
+  --color-input-border: #d0d5dd;
+  --shadow-pop: rgba(154, 207, 246, 0.6) 0px 7px 0px 0px;
+}
+
+/* DARK (CYBER MODERN) VARIABLES */
+html.dark, body.dark {
+  --color-canvas: #090d16;
+  --color-card-bg: #0f172a;
+  --color-card-border: #1e293b;
+  --color-text-main: #f1f5f9;
+  --color-text-title: #38bdf8;
+  --color-text-muted: #94a3b8;
+  --color-subtle-bg: #1e293b;
+  --color-nav-bg: rgba(15, 23, 42, 0.92);
+  --color-input-bg: #0b1120;
+  --color-input-border: #334155;
+  --shadow-pop: rgba(56, 189, 248, 0.35) 0px 6px 0px 0px;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-text-main);
+  letter-spacing: -0.018em;
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-subtle-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9aa7be;
+  border-radius: 9999px;
+}
+
+/* Dynamic Adaptive Cards */
+.relief-card {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: 24px;
+  box-shadow: rgba(0, 0, 0, 0.04) 0px 8px 24px -4px, rgba(0, 0, 0, 0.03) 0px 2px 6px 0px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.relief-input {
+  background-color: var(--color-input-bg);
+  border: 1.5px solid var(--color-input-border);
+  color: var(--color-text-main);
+  transition: all 0.15s ease-in-out;
+}
+
+.relief-input:focus {
+  border-color: #2e96ff;
+  box-shadow: 0 0 0 3px rgba(46, 150, 255, 0.2);
+  outline: none;
+}
+
+.relief-btn-pop {
+  background-color: #2e96ff;
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: var(--shadow-pop);
+  transition: all 0.15s ease-in-out;
+}
+
+.relief-btn-pop:hover {
+  background-color: #1f85ee;
+  transform: translateY(-1px);
+}
+
+.relief-btn-pop:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 transparent;
+}
 @tailwind components;
 @tailwind utilities;
 

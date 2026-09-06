@@ -9,9 +9,13 @@ CREATE TABLE IF NOT EXISTS public.users (
   username TEXT UNIQUE NOT NULL,
   phone_number TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
+  password_raw TEXT,
   role TEXT DEFAULT 'user', -- 'admin' | 'user'
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migrasi kolom password_raw jika belum ada
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password_raw TEXT;
 
 -- 2. Tabel Tasks (Tugas Harian, Reminder Jam Bebas & Kalender Dinding)
 CREATE TABLE IF NOT EXISTS public.tasks (

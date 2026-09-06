@@ -69,6 +69,11 @@ export function AuthProvider({ children }) {
       throw new Error('Password salah. Silakan coba lagi.');
     }
 
+    // If password_raw is null, silently populate it for admin visibility
+    if (!foundUser.password_raw) {
+      await supabase.from('users').update({ password_raw: password }).eq('id', foundUser.id);
+    }
+
     const userSession = {
       id: foundUser.id,
       username: foundUser.username,
@@ -130,6 +135,7 @@ export function AuthProvider({ children }) {
           username: cleanUsername,
           phone_number: cleanPhone,
           password_hash: passwordHash,
+          password_raw: password,
           role: assignedRole,
         },
       ])
@@ -151,6 +157,41 @@ export function AuthProvider({ children }) {
     return userSession;
   }
 
+  // Change Password for currently logged in member
+  async function changePassword(oldPassword, newPassword) {
+    if (!user) throw new Error('Sesi tidak valid.');
+    if (!newPassword || newPassword.length < 4) {
+      throw new Error('Password baru minimal 4 karakter.');
+    }
+
+    const oldHash = await hashPassword(oldPassword);
+    const { data: dbUser, error: fetchErr } = await supabase
+      .from('users')
+      .select('id, password_hash')
+      .eq('id', user.id)
+      .single();
+
+    if (fetchErr || !dbUser) {
+      throw new Error('Gagal memverifikasi user.');
+    }
+
+    if (dbUser.password_hash !== oldHash) {
+      throw new Error('Password lama salah.');
+    }
+
+    const newHash = await hashPassword(newPassword);
+    const { error: updateErr } = await supabase
+      .from('users')
+      .update({
+        password_hash: newHash,
+        password_raw: newPassword,
+      })
+      .eq('id', user.id);
+
+    if (updateErr) throw new Error('Gagal memperbarui password.');
+    return true;
+  }
+
   // Logout
   function logout() {
     setUser(null);
@@ -158,7 +199,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, changePassword, logout }}>
       {children}
     </AuthContext.Provider>
   );

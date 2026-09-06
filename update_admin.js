@@ -1,4 +1,7 @@
-'use client';
+const fs = require('fs');
+const path = require('path');
+
+const adminCode = `'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/authContext';
@@ -74,18 +77,18 @@ export default function AdminPage() {
     try {
       await supabase.from('users').update({ role: nextRole }).eq('id', targetUser.id);
       setUsersList(prev => prev.map(u => (u.id === targetUser.id ? { ...u, role: nextRole } : u)));
-      showToast(`Role ${targetUser.username} diubah jadi ${nextRole.toUpperCase()}`);
+      showToast(\`Role \${targetUser.username} diubah jadi \${nextRole.toUpperCase()}\`);
     } catch (err) {
       showToast('Gagal mengubah role', 'error');
     }
   }
 
   async function deleteUser(id, username) {
-    if (!confirm(`Hapus akun @${username}?`)) return;
+    if (!confirm(\`Hapus akun @\${username}?\`)) return;
     try {
       await supabase.from('users').delete().eq('id', id);
       setUsersList(prev => prev.filter(u => u.id !== id));
-      showToast(`User @${username} dihapus`);
+      showToast(\`User @\${username} dihapus\`);
     } catch (err) {
       showToast('Gagal menghapus user', 'error');
     }
@@ -120,7 +123,7 @@ export default function AdminPage() {
       setUsersList(prev =>
         prev.map(u => (u.id === resetModalUser.id ? { ...u, password_raw: adminNewPassword, password_hash: newHash } : u))
       );
-      showToast(`Password @${resetModalUser.username} berhasil di-reset!`);
+      showToast(\`Password @\${resetModalUser.username} berhasil di-reset!\`);
       setResetModalUser(null);
       setAdminNewPassword('');
     } catch (err) {
@@ -155,9 +158,9 @@ export default function AdminPage() {
 
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in ${
+          className={\`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3 rounded-full shadow-lg border transition-all animate-fade-in \${
             toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-[#13426f] text-white'
-          }`}
+          }\`}
         >
           <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
           <span className="text-xs font-bold">{toast.message}</span>
@@ -218,7 +221,7 @@ export default function AdminPage() {
 
                       <td className="py-3 px-4 font-mono font-bold text-[#2e96ff]">
                         <a
-                          href={`https://wa.me/${u.phone_number}`}
+                          href={\`https://wa.me/\${u.phone_number}\`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="hover:underline"
@@ -229,11 +232,11 @@ export default function AdminPage() {
 
                       <td className="py-3 px-4">
                         <span
-                          className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${
+                          className={\`px-2.5 py-0.5 rounded-full font-bold text-[10px] \${
                             u.role === 'admin'
                               ? 'bg-[#bde1f9] text-[#13426f]'
                               : 'bg-[#f1ede1] text-[#616c8a]'
-                          }`}
+                          }\`}
                         >
                           {u.role === 'admin' ? '👑 Admin' : '👤 Member'}
                         </span>
@@ -346,3 +349,7 @@ export default function AdminPage() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync(path.join(__dirname, 'app', 'admin', 'page.jsx'), adminCode, 'utf8');
+console.log('Admin page updated successfully!');
