@@ -515,7 +515,7 @@ export default function Dashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-8">
         {/* --- TOP PROFILE & ACTION BAR --- */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <div className="hidden">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center text-xs font-bold text-slate-950 shadow-md">
               {user.username.slice(0, 2).toUpperCase()}
@@ -542,16 +542,7 @@ export default function Dashboard() {
                 <span>👥 Kelola User (Admin)</span>
               </Link>
             )}
-            <button
-              onClick={() => {
-                logout();
-                router.push('/login');
-              }}
-              title="Keluar Akun"
-              className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-950/40 border border-slate-800 hover:border-rose-500/30 text-slate-400 hover:text-rose-300 text-xs font-medium transition"
-            >
-              Logout
-            </button>
+            
           </div>
         </div>
 
