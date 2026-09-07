@@ -581,7 +581,7 @@ makan ronda malam 25000`
                         EXCEL PRO TEMPLATE
                       </div>
                       <div className="text-[9px] text-[var(--text-muted)]">
-                        5 Sheets • KPI Card • Bar Visual • Saldo Berjalan
+                        5 Sheets • KPI Card • Grafik Arus Kas FP&A • Saldo Berjalan
                       </div>
                     </div>
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
