@@ -5,12 +5,9 @@ import { useAuth } from '../../lib/authContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, login, register } = useAuth();
+  const { user, login } = useAuth();
 
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [identifier, setIdentifier] = useState('');
-  const [username, setUsername] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -29,22 +26,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      if (isRegisterMode) {
-        if (!username || !phone || !password) {
-          throw new Error('Semua kolom registrasi wajib diisi!');
-        }
-        const createdUser = await register(username, phone, password);
-        setSuccessMsg(`Selamat datang, ${createdUser.username}! Mengalihkan...`);
-        setTimeout(() => {
-          router.push('/');
-        }, 800);
-      } else {
-        if (!identifier || !password) {
-          throw new Error('Nomor WA / Username dan Password wajib diisi!');
-        }
-        await login(identifier, password);
-        router.push('/');
+      if (!identifier || !password) {
+        throw new Error('Nomor WA / Username dan Password wajib diisi!');
       }
+      await login(identifier, password);
+      router.push('/');
     } catch (err) {
       setErrorMsg(err.message || 'Gagal masuk. Silakan periksa kembali.');
     } finally {
@@ -63,9 +49,7 @@ export default function LoginPage() {
             Wasap Hub
           </h1>
           <p className="text-xs text-[var(--text-muted)]">
-            {isRegisterMode
-              ? 'Daftarkan nomor WhatsApp & akun workspace Anda'
-              : 'Masuk dengan Nomor WhatsApp atau Username'}
+            Masuk dengan Nomor WhatsApp atau Username
           </p>
         </div>
 
@@ -82,45 +66,17 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isRegisterMode ? (
-            <>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[var(--text-main)]">Username</label>
-                <input
-                  type="text"
-                  placeholder="cenot"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="app-input w-full px-4 py-2.5 rounded-full text-xs font-medium"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[var(--text-main)]">Nomor WhatsApp</label>
-                <input
-                  type="text"
-                  placeholder="6289637779993"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="app-input w-full px-4 py-2.5 rounded-full text-xs font-mono font-bold"
-                  required
-                />
-              </div>
-            </>
-          ) : (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[var(--text-main)]">Nomor WA / Username</label>
-              <input
-                type="text"
-                placeholder="6289637779993 atau cenot"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                className="app-input w-full px-4 py-2.5 rounded-full text-xs font-medium"
-                required
-              />
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-[var(--text-main)]">Nomor WA / Username</label>
+            <input
+              type="text"
+              placeholder="6289637779993 atau cenot"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              className="app-input w-full px-4 py-2.5 rounded-full text-xs font-medium"
+              required
+            />
+          </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-[var(--text-main)]">Password</label>
@@ -139,21 +95,17 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-3 app-btn-pop text-xs font-bold uppercase tracking-wider disabled:opacity-50 mt-2"
           >
-            {loading ? 'Memproses...' : isRegisterMode ? 'Daftar Sekarang' : 'Masuk ke Workspace'}
+            {loading ? 'Memproses...' : 'Masuk ke Workspace'}
           </button>
         </form>
 
-        <div className="pt-3 border-t border-[var(--border-color)] text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setIsRegisterMode(!isRegisterMode);
-              setErrorMsg(null);
-            }}
-            className="text-xs font-bold text-[#2e96ff] hover:underline"
-          >
-            {isRegisterMode ? 'Sudah punya akun? Masuk di sini' : 'Belum punya akun? Buat Akun Baru'}
-          </button>
+        <div className="pt-4 border-t border-[var(--border-color)] text-center space-y-1">
+          <p className="text-[11px] text-[var(--text-muted)]">
+            🔒 Pendaftaran akun baru ditutup untuk umum.
+          </p>
+          <p className="text-[11px] text-[var(--text-muted)]">
+            Silakan hubungi <span className="font-bold text-[var(--text-main)]">Admin</span> untuk pendaftaran akun workspace Anda.
+          </p>
         </div>
       </div>
     </div>

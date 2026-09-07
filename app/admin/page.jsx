@@ -19,6 +19,15 @@ export default function AdminPage() {
   const [adminNewPassword, setAdminNewPassword] = useState('');
   const [submittingReset, setSubmittingReset] = useState(false);
 
+  // Modal Tambah User Baru
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newRole, setNewRole] = useState('user');
+  const [submittingAdd, setSubmittingAdd] = useState(false);
+  const [addUserError, setAddUserError] = useState(null);
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -125,6 +134,90 @@ export default function AdminPage() {
     }
   }
 
+  async function handleAddUser(e) {
+    e.preventDefault();
+    setAddUserError(null);
+
+    const cleanUsername = newUsername.trim().toLowerCase();
+    let cleanPhone = newPhone.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('08')) {
+      cleanPhone = '628' + cleanPhone.slice(2);
+    } else if (cleanPhone.startsWith('8')) {
+      cleanPhone = '628' + cleanPhone.slice(1);
+    }
+
+    if (!cleanUsername || cleanUsername.length < 3) {
+      setAddUserError('Username minimal 3 karakter!');
+      return;
+    }
+    if (!cleanPhone || cleanPhone.length < 9) {
+      setAddUserError('Nomor WhatsApp minimal 9 digit angka valid!');
+      return;
+    }
+    if (!newPassword || newPassword.length < 4) {
+      setAddUserError('Password minimal 4 karakter!');
+      return;
+    }
+
+    setSubmittingAdd(true);
+    try {
+      // Check existing username or phone
+      const { data: existing, error: checkErr } = await supabase
+        .from('users')
+        .select('id, username, phone_number')
+        .or(`username.eq.${cleanUsername},phone_number.eq.${cleanPhone}`);
+
+      if (checkErr && checkErr.code !== 'PGRST116') {
+        console.error(checkErr);
+      }
+
+      if (existing && existing.length > 0) {
+        const match = existing[0];
+        if (match.username.toLowerCase() === cleanUsername) {
+          throw new Error(`Username @${cleanUsername} sudah digunakan.`);
+        }
+        if (match.phone_number === cleanPhone) {
+          throw new Error(`Nomor WhatsApp ${cleanPhone} sudah terdaftar.`);
+        }
+      }
+
+      // Hash password
+      const encoder = new TextEncoder();
+      const data = encoder.encode(newPassword + '_wasap_salt_2026');
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const newHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const { data: created, error: insertErr } = await supabase
+        .from('users')
+        .insert([
+          {
+            username: cleanUsername,
+            phone_number: cleanPhone,
+            password_hash: newHash,
+            password_raw: newPassword,
+            role: newRole,
+          },
+        ])
+        .select()
+        .single();
+
+      if (insertErr) throw insertErr;
+
+      setUsersList((prev) => [...prev, created]);
+      showToast(`User @${cleanUsername} berhasil didaftarkan! 🎉`);
+      setIsAddModalOpen(false);
+      setNewUsername('');
+      setNewPhone('');
+      setNewPassword('');
+      setNewRole('user');
+    } catch (err) {
+      setAddUserError(err.message || 'Gagal menambahkan user baru.');
+    } finally {
+      setSubmittingAdd(false);
+    }
+  }
+
   const filteredUsers = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return usersList;
@@ -173,18 +266,37 @@ export default function AdminPage() {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-[var(--text-muted)]">
-              Kelola role, intip password member, dan kontrol nomor WhatsApp
+              Pendaftaran user dikelola admin, kontrol role, dan akses nomor WhatsApp
             </p>
           </div>
 
-          <div className="w-full sm:w-64">
-            <input
-              type="text"
-              placeholder="Cari username / no WA..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="app-input w-full px-4 py-2 rounded-full text-xs font-medium"
-            />
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Tombol Tambah User Baru oleh Admin */}
+            <button
+              type="button"
+              onClick={() => {
+                setNewUsername('');
+                setNewPhone('');
+                setNewPassword('');
+                setNewRole('user');
+                setAddUserError(null);
+                setIsAddModalOpen(true);
+              }}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 transition active:scale-95 flex items-center gap-1.5"
+            >
+              <span>👤+</span>
+              <span>Daftarkan User Baru</span>
+            </button>
+
+            <div className="w-full sm:w-60">
+              <input
+                type="text"
+                placeholder="Cari username / no WA..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="app-input w-full px-4 py-2 rounded-full text-xs font-medium"
+              />
+            </div>
           </div>
         </div>
 
@@ -301,6 +413,115 @@ export default function AdminPage() {
           </div>
         </div>
       </main>
+
+      {/* Modal Tambah User Baru oleh Admin */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+          <div className="app-card w-full max-w-md p-6 sm:p-7 space-y-4 shadow-2xl relative border border-[var(--border-color)]">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+              <div className="space-y-0.5">
+                <h3 className="text-base font-extrabold text-[var(--text-title)] flex items-center gap-2">
+                  <span>👤+</span>
+                  <span>Daftarkan User Baru</span>
+                </h3>
+                <p className="text-xs text-[var(--text-muted)]">
+                  Buatkan akun dan password untuk member workspace
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="w-7 h-7 rounded-full bg-[var(--bg-subtle)] hover:bg-rose-500/20 text-[var(--text-muted)] hover:text-rose-500 flex items-center justify-center text-xs font-bold transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {addUserError && (
+              <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold text-center">
+                ⚠️ {addUserError}
+              </div>
+            )}
+
+            <form onSubmit={handleAddUser} className="space-y-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[var(--text-main)]">Username</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: budi_santoso"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  className="app-input w-full px-4 py-2 rounded-full text-xs font-medium"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[var(--text-main)]">Nomor WhatsApp</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: 628123456789 atau 08123456789"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  className="app-input w-full px-4 py-2 rounded-full text-xs font-mono font-bold"
+                  required
+                />
+                <span className="text-[10px] text-[var(--text-muted)] pl-2">
+                  Otomatis dinormalisasi ke format internasional (628xxx)
+                </span>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[var(--text-main)]">Password Awal</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: member123"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="app-input w-full px-4 py-2 rounded-full text-xs font-mono font-bold"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-[var(--text-main)]">Role Akun</label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-[var(--bg-subtle)] rounded-xl border border-[var(--border-color)] text-xs font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setNewRole('user')}
+                    className={`py-1.5 rounded-lg transition ${
+                      newRole === 'user'
+                        ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                        : 'text-[var(--text-muted)]'
+                    }`}
+                  >
+                    👤 Member (User)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewRole('admin')}
+                    className={`py-1.5 rounded-lg transition ${
+                      newRole === 'admin'
+                        ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                        : 'text-[var(--text-muted)]'
+                    }`}
+                  >
+                    👑 Admin
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingAdd || !newUsername.trim() || !newPhone.trim() || !newPassword.trim()}
+                className="w-full py-2.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 disabled:opacity-50 mt-2 transition active:scale-95"
+              >
+                {submittingAdd ? 'Mendaftarkan User...' : 'Simpan & Daftarkan User'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal Admin Reset Password Member */}
       {resetModalUser && (
