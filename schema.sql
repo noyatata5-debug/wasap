@@ -148,3 +148,28 @@ ALTER TABLE public.assets ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Allow all on assets" ON public.assets;
 CREATE POLICY "Allow all on assets" ON public.assets FOR ALL USING (true) WITH CHECK (true);
 
+-- 11. Publikasi Supabase Realtime (Wajib untuk Sinkronisasi Realtime di Web)
+-- Mengaktifkan Realtime replication pada tabel utama agar web menerima broadcast perubahan data otomatis
+DO $$
+BEGIN
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.tasks;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.expenses;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.incomes;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.threads;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.assets;
+  EXCEPTION WHEN duplicate_object THEN NULL;
+  END;
+END $$;
