@@ -109,3 +109,13 @@ body {
   border: 1px solid rgba(46, 150, 255, 0.3) !important;
   color: var(--text-title) !important;
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

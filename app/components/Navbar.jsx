@@ -98,7 +98,7 @@ export default function Navbar() {
     <>
       <nav className="bg-[var(--nav-bg)] backdrop-blur-md border-b border-[var(--border-color)] sticky top-0 z-40 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <div className="flex items-center gap-6">
               <Link href="/" className="flex items-center gap-2.5 group">
@@ -190,6 +190,29 @@ export default function Navbar() {
                   Logout
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Row (Workspace, Finance, etc.) */}
+          <div className="flex md:hidden items-center justify-center pb-2.5 pt-0 px-2">
+            <div className="flex items-center gap-1 bg-[var(--bg-subtle)] p-1 rounded-full border border-[var(--border-color)] shadow-xs max-w-full overflow-x-auto no-scrollbar">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                      isActive
+                        ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-card)]'
+                    }`}
+                  >
+                    <span>{link.icon}</span>
+                    <span>{link.label}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
