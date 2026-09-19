@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench · theme: Relief / Dark Slate */
 /* ☀️ LIGHT MODE (WARM RELIEF CREAM) */
 :root {
   --bg-canvas: #f9f7f0;
@@ -17,33 +18,47 @@
   --text-muted: #616c8a;
   --nav-bg: rgba(255, 255, 255, 0.94);
   --pop-color: #2e96ff;
-  --pop-shadow: rgba(154, 207, 246, 0.6) 0px 6px 0px 0px;
+  --pop-shadow: rgba(154, 207, 246, 0.6) 0px 4px 0px 0px;
 }
 
-/* 🌙 DARK MODE (OBSIDIAN CYBER SLATE) */
+/* 🌙 DARK MODE (OBSIDIAN MODERN SLATE) */
 html.dark, .dark {
-  --bg-canvas: #090d16;
-  --bg-card: #0f172a;
-  --bg-subtle: #1e293b;
-  --bg-hover: #273548;
-  --border-color: #1e293b;
-  --border-input: #334155;
-  --text-title: #38bdf8;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --nav-bg: rgba(15, 23, 42, 0.95);
-  --pop-color: #0284c7;
-  --pop-shadow: rgba(56, 189, 248, 0.3) 0px 6px 0px 0px;
+  --bg-canvas: oklch(13% 0.012 260);
+  --bg-card: oklch(16% 0.016 260);
+  --bg-subtle: oklch(20% 0.020 260);
+  --bg-hover: oklch(23% 0.022 260);
+  --border-color: oklch(24% 0.016 260);
+  --border-input: oklch(30% 0.020 260);
+  --text-title: oklch(72% 0.17 160);
+  --text-main: oklch(98.5% 0.004 250);
+  --text-muted: oklch(65% 0.015 255);
+  --nav-bg: oklch(14% 0.014 260 / 0.95);
+  --pop-color: oklch(62% 0.22 256);
+  --pop-shadow: oklch(62% 0.22 256 / 0.25) 0px 4px 0px 0px;
+}
+
+html, body {
+  overflow-x: clip;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
   background-color: var(--bg-canvas) !important;
   color: var(--text-main) !important;
   letter-spacing: -0.018em;
-  overflow-x: hidden;
   min-height: 100vh;
   transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum';
 }
 
 /* Base Surfaces */
