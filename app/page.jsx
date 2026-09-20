@@ -5,6 +5,30 @@ import { useAuth } from '../lib/authContext';
 import { supabase } from '../lib/supabase';
 import Navbar from './components/Navbar';
 import { getLocalDateString, formatIndoDate, getRelativeDateBadge } from '../lib/dateUtils';
+import {
+  Utensils,
+  Car,
+  ShoppingBag,
+  Zap,
+  MoreHorizontal,
+  Check,
+  AlertCircle,
+  CheckCircle2,
+  RefreshCw,
+  Calendar,
+  Bell,
+  Clock,
+  Trash2,
+  Plus,
+  ArrowRight,
+  TrendingDown,
+  Lightbulb,
+  CheckSquare,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  X
+} from 'lucide-react';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -44,11 +68,11 @@ export default function Dashboard() {
   const [isCalModalOpen, setIsCalModalOpen] = useState(false);
 
   const categories = [
-    { label: 'Makan', icon: '🍲' },
-    { label: 'Transport', icon: '🚗' },
-    { label: 'Belanja', icon: '🛒' },
-    { label: 'Tagihan', icon: '⚡' },
-    { label: 'Lainnya', icon: '✨' },
+    { label: 'Makan', icon: Utensils },
+    { label: 'Transport', icon: Car },
+    { label: 'Belanja', icon: ShoppingBag },
+    { label: 'Tagihan', icon: Zap },
+    { label: 'Lainnya', icon: MoreHorizontal },
   ];
 
   const showToast = (message, type = 'success') => {
@@ -418,8 +442,8 @@ export default function Dashboard() {
               : 'bg-[#13426f] dark:bg-[#0284c7] text-white border-transparent'
           }`}
         >
-          <span>{toast.type === 'error' ? '⚠️' : '✅'}</span>
-          <span className="text-xs font-bold">{toast.message}</span>
+          <span>{toast.type === 'error' ? <AlertCircle className="w-4 h-4 text-rose-400" /> : <CheckCircle2 className="w-4 h-4 text-emerald-400" />}</span>
+          <span className="text-xs font-semibold">{toast.message}</span>
         </div>
       )}
 
@@ -439,7 +463,7 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-2.5">
             <div
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full app-badge-subtle text-xs font-bold transition-all cursor-default"
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-full app-badge-subtle text-xs font-semibold transition-all cursor-default"
               title={
                 realtimeStatus === 'connected'
                   ? 'Realtime WebSocket aktif & sinkronisasi otomatis'
@@ -447,9 +471,9 @@ export default function Dashboard() {
               }
             >
               <span
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                className={`w-2 h-2 rounded-full transition-colors ${
                   realtimeStatus === 'connected'
-                    ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.7)]'
+                    ? 'bg-emerald-500 animate-pulse'
                     : realtimeStatus === 'connecting'
                     ? 'bg-amber-400 animate-pulse'
                     : 'bg-rose-500'
@@ -457,10 +481,10 @@ export default function Dashboard() {
               />
               <span>
                 {realtimeStatus === 'connected'
-                  ? 'WhatsApp Sync Active'
+                  ? 'Sync Active'
                   : realtimeStatus === 'connecting'
-                  ? 'Menghubungkan Sync...'
-                  : 'Sync Terputus'}
+                  ? 'Connecting...'
+                  : 'Disconnected'}
               </span>
               {lastSyncTime && (
                 <span className="text-[10px] text-[var(--text-muted)] font-mono font-normal">
@@ -472,15 +496,13 @@ export default function Dashboard() {
               type="button"
               onClick={() => {
                 fetchData(true);
-                showToast('Data diperbarui secara realtime! 🔄');
+                showToast('Data diperbarui secara realtime!');
               }}
               disabled={isSyncing}
-              className="p-2 rounded-full app-card hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] transition active:scale-95 flex items-center justify-center disabled:opacity-50"
+              className="p-2 rounded-lg app-card hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] transition active:scale-95 flex items-center justify-center disabled:opacity-50"
               title="Sinkronkan Sekarang"
             >
-              <span className={`inline-block transition-transform ${isSyncing ? 'animate-spin' : ''}`}>
-                🔄
-              </span>
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -494,7 +516,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">🎯</span>
+                    <CheckSquare className="w-4 h-4 text-sky-500" />
                     <h2 className="font-extrabold text-base text-[var(--text-title)]">
                       {showAllAgendaDates
                         ? 'Semua Agenda'
@@ -753,7 +775,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">💡</span>
+                  <Lightbulb className="w-4 h-4 text-amber-500" />
                   <h2 className="font-extrabold text-base text-[var(--text-title)]">Draft Ide Cepat</h2>
                 </div>
                 <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full app-badge-subtle">
@@ -811,7 +833,7 @@ export default function Dashboard() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">💸</span>
+                  <TrendingDown className="w-4 h-4 text-emerald-500" />
                   <h2 className="font-extrabold text-base text-[var(--text-title)]">Pengeluaran Hari Ini</h2>
                 </div>
                 <span className="text-xs font-black font-mono text-[var(--text-title)] bg-[var(--bg-subtle)] px-2.5 py-0.5 rounded-full">
