@@ -843,20 +843,24 @@ export default function Dashboard() {
 
               <form onSubmit={addExpense} className="space-y-2.5">
                 <div className="flex flex-wrap gap-1.5">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.label}
-                      type="button"
-                      onClick={() => setSelectedCategory(cat.label)}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
-                        selectedCategory === cat.label
-                          ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
-                          : 'bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
-                      }`}
-                    >
-                      {cat.icon} {cat.label}
-                    </button>
-                  ))}
+                  {categories.map((cat) => {
+                    const CatIcon = cat.icon;
+                    return (
+                      <button
+                        key={cat.label}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.label)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
+                          selectedCategory === cat.label
+                            ? 'bg-[#13426f] dark:bg-[#0284c7] text-white shadow-sm'
+                            : 'bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)]'
+                        }`}
+                      >
+                        <CatIcon className="w-3 h-3" />
+                        <span>{cat.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
